@@ -297,18 +297,18 @@ function Wizard({ userId }) {
   if (isLocked && result) {
     return (
       <div className="space-y-6 animate-fade-in">
-        <div className="bg-gradient-to-r from-[#FFF5F8] via-[#FDF2F3] to-[#FBEFF1] border border-[#FBEFF1] rounded-2xl p-5 text-sm text-[#a37b3d] shadow-sm flex items-start gap-4">
-          <div className="p-2.5 bg-white rounded-xl shadow-inner border border-[#FEF4F7] shrink-0 text-[#a37b3d]">
-            <Sparkles size={20} />
+        <div className="bg-[#FAF7F2] border border-[#EADBCC] rounded-3xl p-6 text-sm shadow-xs flex items-start gap-4">
+          <div className="p-3 bg-white rounded-2xl shadow-xs border border-[#EADBCC] shrink-0 text-[#9B7036]">
+            <Sparkles size={22} />
           </div>
           <div>
-            <h4 className="font-extrabold text-gray-900 tracking-tight text-base mb-1">Your Dowry Budget Plan is Finalized</h4>
-            <p className="text-gray-600 leading-relaxed font-light text-xs sm:text-sm">
-              Use the budget re-allocation sliders inside the results dashboard below to dynamically move funds from one category to another as your priorities evolve.
+            <h4 className="font-bold font-serif text-stone-900 tracking-tight text-lg mb-1">Your Wedding Budget Plan is Finalized</h4>
+            <p className="text-stone-600 leading-relaxed font-sans text-xs sm:text-sm">
+              You can fine-tune budget re-allocation sliders inside the results dashboard below to dynamically adjust funds across categories as your wedding plans progress.
             </p>
           </div>
         </div>
-        <div className="bg-white rounded-3xl shadow-lg border border-[#FBEFF1] p-6 md:p-8">
+        <div className="bg-white rounded-3xl shadow-sm border border-[#EFEAE4] p-6 md:p-8">
           <StepResults
             result={result}
             loading={false}
@@ -328,8 +328,8 @@ function Wizard({ userId }) {
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-12 animate-fade-in">
-      {/* Wizard Steps - Glassmorphism Indicator */}
-      <div className="bg-white/90 backdrop-blur-md rounded-3xl border border-primary-200 shadow-sm p-6">
+      {/* Wizard Steps - Luxury Stepper */}
+      <div className="bg-white rounded-3xl border border-[#EFEAE4] shadow-xs p-6">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-2">
           {STEPS.map((step, idx) => {
             const isActive = currentStep === step.id;
@@ -346,23 +346,23 @@ function Wizard({ userId }) {
                   <div
                     className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold transition-all duration-300 border ${
                       isActive
-                        ? 'bg-gradient-to-tr from-primary-500 to-primary-800 text-white shadow-md shadow-primary-500/25 border-transparent scale-105'
+                        ? 'bg-[#9B7036] text-white shadow-md shadow-[#9B7036]/20 border-[#9B7036] scale-105'
                         : isCompleted
-                        ? 'bg-primary-50 border-primary-200 text-primary-900'
-                        : 'bg-gray-50 border-gray-100 text-gray-400 group-hover:bg-primary-50 group-hover:text-primary-900'
+                        ? 'bg-[#FAF7F2] border-[#EADBCC] text-[#9B7036]'
+                        : 'bg-stone-50 border-stone-100 text-stone-400 group-hover:bg-[#FAF7F2] group-hover:text-[#9B7036]'
                     }`}
                   >
                     {isCompleted ? <Check size={18} /> : step.icon}
                   </div>
                   <div className="text-left">
-                    <p className={`text-[10px] uppercase font-bold tracking-wider ${isActive ? 'text-primary-900' : 'text-gray-400'}`}>Step 0{step.id}</p>
-                    <p className={`text-xs font-bold ${isActive ? 'text-gray-950' : 'text-gray-500 group-hover:text-gray-700'}`}>{step.title}</p>
+                    <p className={`text-[10px] uppercase font-bold tracking-wider ${isActive ? 'text-[#9B7036]' : 'text-stone-400'}`}>Step 0{step.id}</p>
+                    <p className={`text-xs font-bold ${isActive ? 'text-stone-900' : 'text-stone-500 group-hover:text-stone-800'}`}>{step.title}</p>
                   </div>
                 </div>
                 {idx < STEPS.length - 1 && (
                   <div
                     className={`hidden sm:block flex-1 h-0.5 max-w-[50px] md:max-w-[80px] rounded-full transition-colors duration-300 ${
-                      currentStep > step.id ? 'bg-gradient-to-r from-primary-400 to-primary-700' : 'bg-gray-100'
+                      currentStep > step.id ? 'bg-[#9B7036]' : 'bg-stone-100'
                     }`}
                   />
                 )}
@@ -374,14 +374,14 @@ function Wizard({ userId }) {
 
       {/* Error Alert Box */}
       {error && (
-        <div className="bg-rose-50 border border-rose-100 text-rose-800 p-4 rounded-2xl text-xs md:text-sm flex items-center gap-3 animate-pulse">
-          <ShieldAlert className="text-rose-500 shrink-0" size={20} />
+        <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-2xl text-xs md:text-sm flex items-center gap-3 animate-pulse">
+          <ShieldAlert className="text-rose-600 shrink-0" size={20} />
           <span className="font-semibold">{error}</span>
         </div>
       )}
 
       {/* Primary Card Container */}
-      <div className="bg-white rounded-3xl border border-primary-200/50 shadow-xl shadow-primary-500/[0.02] p-6 md:p-8 min-h-[400px] flex flex-col justify-between">
+      <div className="bg-white rounded-3xl border border-[#EFEAE4] shadow-sm p-6 md:p-8 min-h-[400px] flex flex-col justify-between">
         <div className="mb-8">
           {currentStep === 1 && (
             <StepFinancial formData={formData} updateForm={updateForm} />
@@ -417,13 +417,13 @@ function Wizard({ userId }) {
         </div>
 
         {/* Wizard Footer controls */}
-        <div className="flex items-center justify-between pt-6 border-t border-gray-100/80">
+        <div className="flex items-center justify-between pt-6 border-t border-stone-100">
           <button
             onClick={handleBack}
             disabled={currentStep === 1}
-            className="px-5 py-2.5 rounded-2xl border border-gray-200 text-gray-500 font-bold hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center gap-2 text-sm"
+            className="px-5 py-2.5 rounded-xl border border-stone-200 text-stone-600 font-bold hover:bg-stone-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center gap-2 text-xs"
           >
-            <ArrowLeft size={16} /> Back
+            <ArrowLeft size={16} /> Previous
           </button>
           
           <div className="flex items-center gap-3">
@@ -431,10 +431,10 @@ function Wizard({ userId }) {
               <button
                 onClick={handleSave}
                 disabled={loading}
-                className="px-6 py-2.5 rounded-2xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 disabled:opacity-50 transition-all cursor-pointer flex items-center gap-2 text-sm shadow-md shadow-emerald-500/10"
+                className="px-6 py-2.5 rounded-xl bg-emerald-700 text-white font-bold hover:bg-emerald-800 disabled:opacity-50 transition-all cursor-pointer flex items-center gap-2 text-xs shadow-xs"
               >
                 {loading ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
-                {loading ? 'Saving...' : 'Save Plan'}
+                {loading ? 'Saving…' : 'Save Wedding Plan'}
               </button>
             )}
 
@@ -442,16 +442,16 @@ function Wizard({ userId }) {
               <button
                 onClick={currentStep === 3 ? handleEstimate : handleNext}
                 disabled={loading}
-                className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-800 text-white font-bold hover:opacity-95 disabled:opacity-50 transition-all cursor-pointer flex items-center gap-2 text-sm shadow-lg shadow-primary-500/10"
+                className="px-6 py-2.5 rounded-xl bg-[#9B7036] hover:bg-[#7E5724] text-white font-bold disabled:opacity-50 transition-all cursor-pointer flex items-center gap-2 text-xs shadow-md"
               >
                 {loading ? (
                   <>
                     <RefreshCw className="animate-spin" size={16} />
-                    <span>Calculating...</span>
+                    <span>Calculating…</span>
                   </>
                 ) : (
                   <>
-                    <span>{currentStep === 3 ? 'Calculate Estimate' : 'Continue'}</span>
+                    <span>{currentStep === 3 ? 'Generate Calculation' : 'Continue'}</span>
                     <ArrowRight size={16} />
                   </>
                 )}

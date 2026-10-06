@@ -1,20 +1,19 @@
-
 import React, { useState } from 'react';
-import { Star } from 'lucide-react';
+import { Star, Check, X, ShieldAlert, Sparkles, SlidersHorizontal } from 'lucide-react';
 import CategoryThumb from './CategoryThumb';
 
 const PRIORITY_OPTIONS = [
-  { value: 'High',       label: 'High',       color: 'bg-rose-50 text-rose-700 border-rose-200' },
-  { value: 'Medium',     label: 'Medium',     color: 'bg-amber-50 text-amber-700 border-amber-200' },
-  { value: 'Low',        label: 'Low',        color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  { value: 'Not_Wanted', label: 'Excluded',   color: 'bg-gray-50 text-gray-500 border-gray-200' },
+  { value: 'High',       label: 'High',       activeClass: 'bg-[#800020] text-white border-[#800020] shadow-xs' },
+  { value: 'Medium',     label: 'Medium',     activeClass: 'bg-[#9B7036] text-white border-[#9B7036] shadow-xs' },
+  { value: 'Low',        label: 'Low',        activeClass: 'bg-[#1B6B4D] text-white border-[#1B6B4D] shadow-xs' },
+  { value: 'Not_Wanted', label: 'Exclude',    activeClass: 'bg-gray-800 text-white border-gray-800 shadow-xs' },
 ];
 
-const PRIORITY_BADGE_COLOR = {
-  High:       'bg-rose-50 text-rose-700 border-rose-200',
-  Medium:     'bg-amber-50 text-amber-700 border-amber-200',
-  Low:        'bg-emerald-50 text-emerald-700 border-emerald-200',
-  Not_Wanted: 'bg-gray-50 text-gray-500 border-gray-200',
+const PRIORITY_BADGE_STYLE = {
+  High:       'bg-rose-50 text-[#800020] border-rose-200/60',
+  Medium:     'bg-[#FAF3E8] text-[#9B7036] border-[#ECD4A8]/60',
+  Low:        'bg-emerald-50 text-[#1B6B4D] border-emerald-200/60',
+  Not_Wanted: 'bg-gray-100 text-gray-500 border-gray-200',
 };
 
 function StepPriority({ formData, categories, updatePriority, updateRedistribution, updateForm }) {
@@ -30,16 +29,23 @@ function StepPriority({ formData, categories, updatePriority, updateRedistributi
     }
   };
 
+  const selectedCount = Object.values(formData.priorities).filter(v => v && v !== 'Not_Wanted').length;
+
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-7 animate-fade-in">
       <div>
-        <h2 className="text-2xl font-extrabold text-gray-950 tracking-tight mb-1">Priority Settings</h2>
-        <p className="text-sm text-gray-500 font-light">
-          Set the relative importance of each category. Each card shows the admin placeholder image for that category.
+        <span className="text-[11px] font-bold tracking-widest uppercase text-[#9B7036] bg-[#FAF3E8] px-3 py-1 rounded-full border border-[#ECD4A8]/40">
+          Phase 03 · Category Importance
+        </span>
+        <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 tracking-tight mt-2 mb-1.5">
+          Wedding Category Priorities
+        </h2>
+        <p className="text-sm text-gray-500 font-light leading-relaxed">
+          Set relative importance weights across all bridal categories. The engine will allocate your budget accordingly.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {categories.map((cat) => {
           const currentPriority  = formData.priorities[cat.key] || null;
           const isNotWanted      = currentPriority === 'Not_Wanted';
@@ -49,72 +55,82 @@ function StepPriority({ formData, categories, updatePriority, updateRedistributi
           return (
             <div
               key={cat.key}
-              className={`border rounded-3xl p-5 transition-all duration-300 relative overflow-hidden ${
+              className={`border rounded-2xl p-5 transition-all duration-200 relative ${
                 isNotWanted
-                  ? 'border-gray-200 bg-gray-50/40 shadow-inner'
-                  : 'border-primary-100 hover:border-primary-300 bg-white shadow-sm hover:shadow-md'
+                  ? 'border-[#EFEAE4] bg-[#FAF7F2]/50 opacity-70'
+                  : 'border-[#EADBCC] bg-white hover:border-[#9B7036]/50 shadow-xs hover:shadow-card-hover'
               }`}
             >
-              <div className="flex items-center justify-between mb-4 gap-2">
+              <div className="flex items-center justify-between mb-4 gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className={`shrink-0 ${isNotWanted ? 'opacity-40' : ''}`}>
+                  <div className={`shrink-0 ${isNotWanted ? 'opacity-40 grayscale' : ''}`}>
                     {cat.category ? (
-                      <CategoryThumb category={cat.category} size={52} />
+                      <CategoryThumb category={cat.category} size={46} />
                     ) : cat.iconPng ? (
-                      <img src={cat.iconPng} alt={cat.label} className="w-[52px] h-[52px] rounded-xl object-cover border border-gray-100" />
+                      <img src={cat.iconPng} alt={cat.label} className="w-11 h-11 rounded-xl object-cover border border-[#EFEAE4]" />
                     ) : (
-                      <span className="text-xl w-[52px] h-[52px] bg-gray-50 rounded-xl inline-flex items-center justify-center border border-gray-100">{cat.icon}</span>
+                      <span className="w-11 h-11 bg-[#FAF7F2] rounded-xl inline-flex items-center justify-center border border-[#EFEAE4] text-xs font-bold text-[#9B7036]">
+                        {cat.label?.slice(0, 2).toUpperCase()}
+                      </span>
                     )}
                   </div>
-                  <span className={`text-sm font-bold capitalize truncate ${isNotWanted ? 'text-gray-400 line-through' : 'text-gray-950'}`}>
-                    {cat.label}
-                  </span>
+                  <div className="min-w-0">
+                    <span className={`text-sm font-bold block truncate capitalize ${isNotWanted ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
+                      {cat.label}
+                    </span>
+                    <span className="text-[11px] text-gray-400 font-normal">
+                      {isNotWanted ? 'Excluded from allocation' : 'Custom weight enabled'}
+                    </span>
+                  </div>
                 </div>
-                <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border shrink-0 ${currentPriority && PRIORITY_BADGE_COLOR[currentPriority] ? PRIORITY_BADGE_COLOR[currentPriority] : 'bg-gray-50 text-gray-300 border-gray-100'}`}>
-                  {currentPriority === 'Not_Wanted' ? 'Excluded' : currentPriority || 'Select'}
+                <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border shrink-0 ${currentPriority && PRIORITY_BADGE_STYLE[currentPriority] ? PRIORITY_BADGE_STYLE[currentPriority] : 'bg-gray-50 text-gray-400 border-gray-200'}`}>
+                  {currentPriority === 'Not_Wanted' ? 'Excluded' : currentPriority || 'Unset'}
                 </span>
               </div>
 
               {cat.hasTypeSelector && !isNotWanted && (
-                <div className="flex gap-2 mb-4 bg-gray-50 p-1 rounded-2xl">
+                <div className="flex gap-2 mb-4 bg-[#FAF7F2] p-1 rounded-xl border border-[#EFEAE4]">
                   {['bridal', 'groom'].map((type) => (
                     <button
                       key={type}
                       type="button"
                       onClick={() => updateForm({ wedding_dress_type: type })}
-                      className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all capitalize cursor-pointer ${
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all capitalize cursor-pointer ${
                         formData.wedding_dress_type === type
-                          ? 'bg-white text-primary-900 shadow-sm border border-primary-100/50'
-                          : 'text-gray-400 hover:text-gray-600'
+                          ? 'bg-white text-gray-900 shadow-xs border border-[#E8E2D9]'
+                          : 'text-gray-500 hover:text-gray-800'
                       }`}
                     >
-                      {type === 'bridal' ? '👗 Bridal' : '🤵 Groom'}
+                      {type === 'bridal' ? 'Bridal Ensemble' : 'Groom Attire'}
                     </button>
                   ))}
                 </div>
               )}
 
               <div className="grid grid-cols-4 gap-1.5">
-                {PRIORITY_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => handlePriorityClick(cat.key, opt.value)}
-                    className={`py-2 rounded-xl text-[10px] font-bold border transition-all cursor-pointer ${
-                      currentPriority === opt.value
-                        ? opt.color + ' border-current ring-1 ring-primary-100'
-                        : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-gray-600'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+                {PRIORITY_OPTIONS.map((opt) => {
+                  const isSelected = currentPriority === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => handlePriorityClick(cat.key, opt.value)}
+                      className={`py-2 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
+                        isSelected
+                          ? opt.activeClass
+                          : 'bg-white text-gray-500 border-[#E8E2D9] hover:border-[#9B7036]/40 hover:text-gray-900'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
               </div>
 
               {showPrompt && (
-                <div className="mt-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl p-4 space-y-3 animate-fade-in">
-                  <p className="text-xs text-amber-900 font-bold">
-                    Transfer this category&apos;s budget to active items?
+                <div className="mt-4 bg-[#FAF3E8] border border-[#ECD4A8] rounded-xl p-3.5 space-y-2.5 animate-fade-in">
+                  <p className="text-xs text-[#4A3B2C] font-semibold">
+                    Reallocate this category&apos;s budget share across remaining items?
                   </p>
                   <div className="flex gap-2">
                     <button
@@ -123,13 +139,13 @@ function StepPriority({ formData, categories, updatePriority, updateRedistributi
                         updateRedistribution(cat.key, true);
                         setPromptShown((prev) => ({ ...prev, [cat.key]: false }));
                       }}
-                      className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
                         redistribution === true
-                          ? 'bg-emerald-600 text-white border-transparent'
-                          : 'bg-white text-amber-800 border-amber-200 hover:bg-amber-50'
+                          ? 'bg-[#1B6B4D] text-white border-[#1B6B4D]'
+                          : 'bg-white text-[#4A3B2C] border-[#ECD4A8] hover:bg-[#FAF7F2]'
                       }`}
                     >
-                      Yes, distribute
+                      Yes, Rebalance
                     </button>
                     <button
                       type="button"
@@ -137,13 +153,13 @@ function StepPriority({ formData, categories, updatePriority, updateRedistributi
                         updateRedistribution(cat.key, false);
                         setPromptShown((prev) => ({ ...prev, [cat.key]: false }));
                       }}
-                      className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
                         redistribution === false
-                          ? 'bg-rose-600 text-white border-transparent'
-                          : 'bg-white text-amber-800 border-amber-200 hover:bg-amber-50'
+                          ? 'bg-[#800020] text-white border-[#800020]'
+                          : 'bg-white text-[#4A3B2C] border-[#ECD4A8] hover:bg-[#FAF7F2]'
                       }`}
                     >
-                      No, discard budget
+                      No, Save Surplus
                     </button>
                   </div>
                 </div>
@@ -153,41 +169,48 @@ function StepPriority({ formData, categories, updatePriority, updateRedistributi
         })}
       </div>
 
-      <div className="bg-gradient-to-r from-primary-50/60 to-primary-100/60 border border-primary-200/50 rounded-3xl p-6 relative overflow-hidden">
-        <h4 className="text-xs font-extrabold text-primary-900 mb-3 uppercase tracking-wider flex items-center gap-1.5">
-          <Star size={14} className="text-primary-800" /> Priority Budget Weights
-        </h4>
-        <div className="grid grid-cols-4 gap-3 text-center mb-4">
+      {/* Priority weight matrix banner */}
+      <div className="bg-[#FAF7F2] border border-[#EADBCC] rounded-2xl p-6">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-6 h-6 rounded-md bg-[#9B7036]/10 flex items-center justify-center text-[#9B7036]">
+            <SlidersHorizontal size={14} />
+          </div>
+          <h4 className="text-xs font-bold text-[#4A3B2C] uppercase tracking-wider">
+            Engine Priority Weights Matrix
+          </h4>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
           {[
-            { rate: '30%', name: 'High', color: 'text-rose-600' },
-            { rate: '20%', name: 'Medium', color: 'text-amber-600' },
-            { rate: '10%', name: 'Low', color: 'text-emerald-600' },
+            { rate: '30%', name: 'High Priority', color: 'text-[#800020]' },
+            { rate: '20%', name: 'Medium Priority', color: 'text-[#9B7036]' },
+            { rate: '10%', name: 'Low Priority', color: 'text-[#1B6B4D]' },
             { rate: '0%', name: 'Excluded', color: 'text-gray-400' },
           ].map(w => (
-            <div key={w.name} className="bg-white rounded-2xl p-3 border border-primary-200/30 shadow-sm">
-              <div className={`font-extrabold text-lg ${w.color}`}>{w.rate}</div>
+            <div key={w.name} className="bg-white rounded-xl p-3 border border-[#EFEAE4] text-center shadow-xs">
+              <div className={`font-serif font-bold text-xl ${w.color}`}>{w.rate}</div>
               <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">{w.name}</div>
             </div>
           ))}
         </div>
-        <p className="text-xs text-primary-900/90 leading-relaxed font-medium">
-          Categories are normalized so the total matches your calculated budget. Excluded categories receive zero budget, which is either redistributed to boost remaining items or saved as surplus cash.
+        <p className="text-xs text-gray-600 font-medium leading-relaxed">
+          The engine normalizes weights across your chosen items to guarantee 100% budget adherence.
         </p>
       </div>
 
-      <div className="bg-amber-50/60 border border-amber-200/50 rounded-3xl p-4 text-center">
-        <p className="text-sm font-bold text-amber-900">
-          Selected: {Object.values(formData.priorities).filter(v => v && v !== 'Not_Wanted').length} / Minimum 5 required
+      {/* Progress status */}
+      <div className={`p-4 rounded-xl border text-center transition-all ${
+        selectedCount >= 5
+          ? 'bg-emerald-50/70 border-emerald-200/70 text-[#1B6B4D]'
+          : 'bg-amber-50/80 border-amber-200/70 text-amber-900'
+      }`}>
+        <p className="text-xs font-bold">
+          Active Categories Selected: {selectedCount} / 5 required minimum
         </p>
-        {Object.values(formData.priorities).filter(v => v && v !== 'Not_Wanted').length < 5 && (
-          <p className="text-xs text-red-600 mt-1 font-semibold">⚠ You must select at least 5 categories to proceed.</p>
+        {selectedCount < 5 && (
+          <p className="text-[11px] font-medium mt-1 text-amber-700">
+            Please assign priorities to at least 5 categories to generate an accurate breakdown.
+          </p>
         )}
-      </div>
-
-      <div className="text-center py-2">
-        <p className="text-xs text-gray-500 font-medium">
-          Ready! Click <strong className="text-primary-900">&quot;Calculate Estimate&quot;</strong> to run the Hybrid Price Engine.
-        </p>
       </div>
     </div>
   );

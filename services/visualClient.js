@@ -54,8 +54,18 @@ async function getRecommendation(imageBuffer, originalname, mimetype, preferredC
       };
     }
     if (error.response) {
-      // ML service returned an error
-      return error.response.data;
+      // ML service returned an error (prefer JSON body; never forward HTML)
+      const data = error.response.data;
+      if (data && typeof data === "object") return data;
+      return {
+        status: "error",
+        stage: "service",
+        reason:
+          error.response.status === 503
+            ? "Visual ML model unavailable. Start with npm run dev:visual (PyTorch required)."
+            : `Visual ML service returned HTTP ${error.response.status}.`,
+        suggestion: "Restart visual-ml-service with the project venv: npm run dev:visual",
+      };
     }
     console.error("[VisualClient] Error:", error.message);
     return {

@@ -29,14 +29,19 @@ export default function ServiceStatus() {
   }, []);
 
   const isMLRunning   = mlHealth?.status === 'ok';
-  const isModelLoaded = mlHealth?.model_loaded;           // always true when Flask is up
+  const isModelLoaded = mlHealth?.model_loaded;
+  const noTorch       = mlHealth?.model_source === 'unavailable_no_torch';
   const isFineTuned   = mlHealth?.model_source === 'fine_tuned';
   const isIndexBuilt  = mlHealth?.index_built;
   const sellerCount   = mlHealth?.seller_products ?? indexStats?.seller_products ?? 0;
   const embDim        = mlHealth?.embedding_dim ?? 1280;
 
-  const modelLabel = isFineTuned ? '✓ Fine-Tuned' : '✓ ImageNet Pretrained';
-  const modelColor = isFineTuned ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700';
+  const modelLabel = noTorch
+    ? '⚠ No PyTorch'
+    : isFineTuned ? '✓ Fine-Tuned' : '✓ ImageNet Pretrained';
+  const modelColor = noTorch
+    ? 'bg-red-100 text-red-700'
+    : isFineTuned ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700';
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-primary-200">
@@ -64,15 +69,19 @@ export default function ServiceStatus() {
           {/* EfficientNet-B0 model */}
           <div className="flex items-center justify-between py-2 border-b border-gray-100">
             <span className="text-xs text-gray-600">EfficientNet-B0</span>
-            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-              isModelLoaded ? modelColor : 'bg-yellow-100 text-yellow-700'
-            }`}>
-              {isModelLoaded ? modelLabel : '⚠ Not Loaded'}
+            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${modelColor}`}>
+              {modelLabel}
             </span>
           </div>
 
+          {noTorch && (
+            <div className="text-[11px] text-red-700 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+              Visual search needs PyTorch. Stop the current process and run <code className="font-mono">npm run dev:visual</code> (creates/uses <code className="font-mono">visual-ml-service\.venv</code>).
+            </div>
+          )}
+
           {/* Model source */}
-          {mlHealth && (
+          {mlHealth && !noTorch && (
             <div className="flex items-center justify-between py-2 border-b border-gray-100">
               <span className="text-xs text-gray-600">Model Source</span>
               <span className="text-xs text-gray-500">

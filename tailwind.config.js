@@ -33,12 +33,16 @@ module.exports = {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        heading: ['Outfit', 'system-ui', 'sans-serif'],
+        sans: ['Inter', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', 'Outfit', 'sans-serif'],
+        heading: ['Outfit', '"Plus Jakarta Sans"', 'sans-serif'],
+        serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
       },
       boxShadow: {
         'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-        'glow': '0 0 20px rgba(168, 85, 247, 0.4)',
+        'luxury': '0 10px 30px -5px rgba(163, 123, 61, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.03)',
+        'card': '0 1px 3px rgba(0,0,0,0.02), 0 6px 16px rgba(0,0,0,0.03)',
+        'card-hover': '0 12px 32px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(163, 123, 61, 0.06)',
       }
     },
   },

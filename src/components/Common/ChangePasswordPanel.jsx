@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ShieldCheck, Lock, KeyRound } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { ROLE_LOGIN } from '../../auth/guard';
 import { policyErrors } from '../../auth/passwordPolicy';
 
-/**
- * Change-password form (buyer / seller / admin). On success every session is
- * revoked server-side, local auth state is cleared and the user signs in again.
- */
 export default function ChangePasswordPanel({ className = '' }) {
   const { user, changePassword } = useAuth();
   const navigate = useNavigate();
@@ -34,41 +31,74 @@ export default function ChangePasswordPanel({ className = '' }) {
     navigate(ROLE_LOGIN[role] || '/', { replace: true });
   };
 
-  const input = 'w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#a37b3d] bg-gray-50/50';
+  const input = 'w-full border border-[#E8E2D9] rounded-xl px-4 py-3 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#9B7036]/20 focus:border-[#9B7036] bg-[#FAF7F2] text-gray-900 transition-all';
 
   return (
-    <div className={`bg-white rounded-3xl shadow-sm border border-[#FBEFF1] p-6 sm:p-8 ${className}`}>
-      <h3 className="text-base font-extrabold text-gray-900 mb-1">Change Password</h3>
-      <p className="text-xs text-gray-500 mb-4">
-        You will be signed out on all devices and asked to sign in again.
+    <div className={`bg-white rounded-3xl shadow-xs border border-[#EADBCC] p-6 sm:p-8 ${className}`}>
+      <div className="flex items-center gap-2 mb-1">
+        <KeyRound size={18} className="text-[#9B7036]" />
+        <h3 className="text-base font-serif font-bold text-gray-900">Account Security & Credentials</h3>
+      </div>
+      <p className="text-xs text-gray-500 font-light mb-5">
+        Updating your password will revoke all active browser sessions across devices for security.
       </p>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-medium" role="alert">
+        <div className="mb-4 p-3.5 bg-rose-50 border border-rose-200 text-[#800020] rounded-xl text-xs font-semibold" role="alert">
           {error}
         </div>
       )}
 
-      <form onSubmit={submit} className="space-y-3 max-w-md">
+      <form onSubmit={submit} className="space-y-4 max-w-md">
         <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1" htmlFor="cp-current">Current password</label>
-          <input id="cp-current" type="password" autoComplete="current-password" required
-            value={form.current} onChange={(e) => update('current', e.target.value)} className={input} />
+          <label className="block text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-1" htmlFor="cp-current">
+            Current Password
+          </label>
+          <input
+            id="cp-current"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={form.current}
+            onChange={(e) => update('current', e.target.value)}
+            className={input}
+          />
         </div>
         <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1" htmlFor="cp-new">New password</label>
-          <input id="cp-new" type="password" autoComplete="new-password" required
-            value={form.next} onChange={(e) => update('next', e.target.value)} className={input} />
-          <p className="text-[11px] text-gray-500 mt-1">At least 8 characters, with a letter and a number.</p>
+          <label className="block text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-1" htmlFor="cp-new">
+            New Password
+          </label>
+          <input
+            id="cp-new"
+            type="password"
+            autoComplete="new-password"
+            required
+            value={form.next}
+            onChange={(e) => update('next', e.target.value)}
+            className={input}
+          />
+          <p className="text-[11px] text-gray-400 mt-1 font-medium">Minimum 8 characters containing letters and numbers.</p>
         </div>
         <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1" htmlFor="cp-confirm">Confirm new password</label>
-          <input id="cp-confirm" type="password" autoComplete="new-password" required
-            value={form.confirm} onChange={(e) => update('confirm', e.target.value)} className={input} />
+          <label className="block text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-1" htmlFor="cp-confirm">
+            Confirm New Password
+          </label>
+          <input
+            id="cp-confirm"
+            type="password"
+            autoComplete="new-password"
+            required
+            value={form.confirm}
+            onChange={(e) => update('confirm', e.target.value)}
+            className={input}
+          />
         </div>
-        <button type="submit" disabled={busy}
-          className="px-5 py-2.5 bg-gradient-to-r from-[#a37b3d] to-[#c69a54] text-white rounded-xl font-bold text-sm hover:brightness-110 disabled:opacity-60 transition-all shadow-sm">
-          {busy ? 'Updating…' : 'Update Password'}
+        <button
+          type="submit"
+          disabled={busy}
+          className="px-6 py-3 bg-[#9B7036] hover:bg-[#7E5724] text-white rounded-xl font-bold text-xs shadow-xs transition-all cursor-pointer disabled:opacity-60"
+        >
+          {busy ? 'Securing Account…' : 'Update Password'}
         </button>
       </form>
     </div>

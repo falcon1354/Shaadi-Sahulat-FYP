@@ -200,13 +200,37 @@ def recommend():
         limit = MAX_RESULTS_DEFAULT
     limit = max(1, min(limit, 12))
 
-    predictor = get_predictor()
-    result    = predictor.predict(
-        image_bytes,
-        preferred_category,
-        limit,
-        user_description=user_description,
-    )
+    if not _HAS_VISUAL_MODEL:
+        return jsonify({
+            "status": "error",
+            "stage": "service",
+            "reason": (
+                "Visual ML model is unavailable (PyTorch/torchvision missing). "
+                "Start the service with: npm run dev:visual "
+                "(uses visual-ml-service\\.venv)."
+            ),
+            "suggestion": (
+                "Stop the current python visual-ml-service process, create/activate "
+                "visual-ml-service\\.venv, install requirements, then run npm run dev:visual."
+            ),
+            "detail": _IMPORT_ERR,
+        }), 503
+
+    try:
+        predictor = get_predictor()
+        result = predictor.predict(
+            image_bytes,
+            preferred_category,
+            limit,
+            user_description=user_description,
+        )
+    except Exception as exc:
+        return jsonify({
+            "status": "error",
+            "stage": "service",
+            "reason": f"Visual recommendation failed: {exc}",
+            "suggestion": "Confirm the ML service was started with npm run dev:visual and the index is built.",
+        }), 500
 
     status_code = 200 if result.get("status") == "success" else 400
     return jsonify(result), status_code

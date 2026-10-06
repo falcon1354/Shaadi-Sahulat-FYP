@@ -1,17 +1,11 @@
 /**
- * ReviewForm — AI-powered review writing + tone-voice (4 agents).
- *
- * Voice flow (matches tone-voice demo):
- *   1. Write comment + pick rating
- *   2. Enable "Convert text to voice"
- *   3. Choose one of 4 voices → Generate / Preview
- *   4. Press Apply Done → voice locked for submit
- *   5. Submit → text + voice stored (Cloudinary) and shown on marketplace
+ * ReviewForm — AI-powered review writing.
+ * Review voiceover / tone-voice UI is intentionally hidden for the current evaluation.
  */
 import React, { useState, useEffect, useRef } from 'react';
 import StarRating from './StarRating';
 import AIReviewGenerator from './AIReviewGenerator';
-import { suggestRating, previewReviewVoice } from '../../api/aiReviewApi';
+import { suggestRating } from '../../api/aiReviewApi';
 
 const TITLE_TAGS = [
   'Fast Delivery', 'Beautiful', 'Great Quality', 'Value for Money',
@@ -19,28 +13,13 @@ const TITLE_TAGS = [
   'Comfortable Fit', 'Loved It', 'Needs Improvement', 'Not as Expected',
 ];
 
-const VOICE_AGENTS = [
-  { id: 'en_female', label: 'English · Female', hint: 'af_bella' },
-  { id: 'en_male', label: 'English · Male', hint: 'am_michael' },
-  { id: 'hi_female', label: 'Urdu/Hindi · Female', hint: 'hf_beta' },
-  { id: 'hi_male', label: 'Urdu/Hindi · Male', hint: 'hm_omega' },
-];
-
 export default function ReviewForm({
   productTitle, productDescription,
-  buyerId, productId,
   onSubmit, onCancel, submitting = false,
 }) {
   const [rating, setRating] = useState(0);
   const [selectedTags, setSelectedTags] = useState([]);
   const [comment, setComment] = useState('');
-  const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [voiceAgent, setVoiceAgent] = useState('en_female');
-  const [voicePreviewUrl, setVoicePreviewUrl] = useState('');
-  const [spokenPreview, setSpokenPreview] = useState('');
-  const [voiceApplied, setVoiceApplied] = useState(false);
-  const [voiceLoading, setVoiceLoading] = useState(false);
-  const [voiceError, setVoiceError] = useState('');
 
   const [aiSuggestion, setAiSuggestion] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -75,16 +54,6 @@ export default function ReviewForm({
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [comment, productTitle, productDescription]);
 
-  // Changing text/agent invalidates applied preview
-  useEffect(() => {
-    if (voiceApplied) {
-      setVoiceApplied(false);
-      setVoicePreviewUrl('');
-      setSpokenPreview('');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [comment, voiceAgent]);
-
   const acceptAiSuggestion = () => {
     if (!aiSuggestion) return;
     setRating(aiSuggestion.suggested_rating);
@@ -100,51 +69,6 @@ export default function ReviewForm({
     setAiGenerated(true);
   };
 
-  const generateVoicePreview = async (agentOverride) => {
-    const agent = agentOverride || voiceAgent;
-    if (!comment.trim() || comment.trim().length < 2) {
-      setVoiceError('Write your review text first (at least 2 characters).');
-      return;
-    }
-    if (rating < 0.5) {
-      setVoiceError('Select a star rating before generating voice.');
-      return;
-    }
-    setVoiceLoading(true);
-    setVoiceError('');
-    setVoiceApplied(false);
-    try {
-      const res = await previewReviewVoice({
-        text: comment.trim(),
-        rating,
-        agent,
-        buyer_id: buyerId || '',
-        product_id: productId || '',
-      });
-      if (!res.success) {
-        setVoiceError(res.error || 'Voice generation failed. Is tone-voice running on port 8000?');
-        setVoicePreviewUrl('');
-        return;
-      }
-      setVoiceAgent(agent);
-      setVoicePreviewUrl(res.audio_data_url || '');
-      setSpokenPreview(res.spoken_text || comment.trim());
-    } catch (err) {
-      setVoiceError(err.message || 'Could not reach voice service.');
-    } finally {
-      setVoiceLoading(false);
-    }
-  };
-
-  const applyVoiceDone = () => {
-    if (!voicePreviewUrl) {
-      setVoiceError('Generate a voice preview first, then press Apply Done.');
-      return;
-    }
-    setVoiceApplied(true);
-    setVoiceError('');
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (rating < 0.5) { alert('Please select a star rating'); return; }
@@ -152,18 +76,11 @@ export default function ReviewForm({
       alert('Please write at least 1-2 words in the comment box');
       return;
     }
-    if (voiceEnabled && !voiceApplied) {
-      const ok = window.confirm(
-        'Voice is enabled but not applied. Submit with selected voice agent anyway (synthesizes on save)?\n\nClick Cancel to preview & Apply Done first.'
-      );
-      if (!ok) return;
-    }
     onSubmit?.({
       rating,
       title: selectedTags.join(', '),
       comment: comment.trim(),
-      voice_agent: voiceEnabled ? voiceAgent : undefined,
-      skip_voice: !voiceEnabled,
+      skip_voice: true,
       ai_suggested_rating: aiSuggestion?.suggested_rating ?? null,
       ai_used: aiUsed,
       ai_generated: aiGenerated,
@@ -176,7 +93,7 @@ export default function ReviewForm({
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-base font-bold text-gray-800">Write a Review</h3>
-          <p className="text-xs text-gray-500 mt-0.5">Share your experience — text + optional spoken voice</p>
+          <p className="text-xs text-gray-500 mt-0.5">Share your experience with this product</p>
         </div>
         <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">
           ✨ AI-powered
@@ -276,103 +193,6 @@ export default function ReviewForm({
             </span>
           )}
         </div>
-      </div>
-
-      {/* Tone-voice: convert text → 4 voices */}
-      <div className="rounded-2xl border border-[#ECD4A8]/70 bg-[#FFFBF5] p-4 space-y-3">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div>
-            <label className="block text-xs font-bold text-gray-800">Convert text into voice</label>
-            <p className="text-[10px] text-gray-500 mt-0.5">
-              Same 4 agents as Tone-Voice. Preview, then Apply Done — text + voice appear on the marketplace.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              setVoiceEnabled((v) => !v);
-              setVoiceApplied(false);
-              setVoicePreviewUrl('');
-            }}
-            className={`text-[11px] font-bold px-3 py-1.5 rounded-lg border ${
-              voiceEnabled
-                ? 'bg-[#a37b3d] text-white border-[#a37b3d]'
-                : 'bg-white text-gray-600 border-gray-200'
-            }`}
-          >
-            {voiceEnabled ? 'Voice ON' : 'Voice OFF'}
-          </button>
-        </div>
-
-        {voiceEnabled && (
-          <>
-            <div className="grid grid-cols-2 gap-2">
-              {VOICE_AGENTS.map((a) => (
-                <button
-                  key={a.id}
-                  type="button"
-                  disabled={voiceLoading}
-                  onClick={() => {
-                    setVoiceAgent(a.id);
-                    generateVoicePreview(a.id);
-                  }}
-                  className={`px-3 py-2.5 rounded-xl text-left text-xs font-semibold border transition-all ${
-                    voiceAgent === a.id
-                      ? 'bg-[#a37b3d] text-white border-[#a37b3d] shadow-sm'
-                      : 'bg-white text-gray-700 border-gray-200 hover:border-[#ECD4A8]'
-                  }`}
-                >
-                  <span className="block">{a.label}</span>
-                  <span className={`text-[9px] ${voiceAgent === a.id ? 'text-white/80' : 'text-gray-400'}`}>
-                    Tap to preview · {a.hint}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => generateVoicePreview()}
-                disabled={voiceLoading || !comment.trim()}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50"
-              >
-                {voiceLoading ? 'Generating…' : 'Generate / Preview'}
-              </button>
-              <button
-                type="button"
-                onClick={applyVoiceDone}
-                disabled={!voicePreviewUrl || voiceLoading}
-                className={`px-4 py-2 rounded-xl text-xs font-bold border disabled:opacity-50 ${
-                  voiceApplied
-                    ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-                    : 'bg-white text-[#a37b3d] border-[#a37b3d]'
-                }`}
-              >
-                {voiceApplied ? '✓ Applied Done' : 'Apply Done'}
-              </button>
-            </div>
-
-            {voiceError && (
-              <p className="text-[11px] text-rose-700 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
-                {voiceError}
-              </p>
-            )}
-
-            {voicePreviewUrl && (
-              <div className="rounded-xl bg-white border border-gray-100 px-3 py-2 space-y-1.5">
-                <p className="text-[10px] font-semibold text-gray-500">
-                  Preview · {VOICE_AGENTS.find((a) => a.id === voiceAgent)?.label}
-                  {voiceApplied ? ' · locked for submit' : ''}
-                </p>
-                {spokenPreview && (
-                  <p className="text-[11px] text-gray-600 italic line-clamp-3">&ldquo;{spokenPreview}&rdquo;</p>
-                )}
-                <audio controls src={voicePreviewUrl} className="w-full h-9" />
-              </div>
-            )}
-          </>
-        )}
       </div>
 
       <div className="flex gap-2 pt-2">

@@ -218,137 +218,169 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
 
   return (
     <div className="animate-fade-in space-y-8 pb-12">
-      {/* Premium Dark Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-tr from-[#1a0a1e] via-[#2d2d44] to-[#3d3455] rounded-3xl p-8 md:p-10 text-white shadow-xl border border-white/10">
-        <div className="absolute right-0 bottom-0 translate-y-12 translate-x-12 w-64 h-64 bg-slate-400/10 rounded-full blur-2xl pointer-events-none" />
+      {/* Luxury Editorial Hero Header */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#FAF7F2] via-[#FDFBF7] to-[#F5EFEB] p-8 md:p-10 border border-[#EADBCC]/80 shadow-[0_4px_24px_rgba(163,123,61,0.06)]">
+        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-72 h-72 bg-[#ECD4A8]/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 -mb-12 w-64 h-64 bg-[#FBEFF1]/40 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-slate-300 text-xs font-bold tracking-wide backdrop-blur-sm">
-                <Sparkles size={12} className="text-slate-300" />
-                <span>Buyer Portal</span>
-              </div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-slate-400 text-xs font-semibold tracking-wide backdrop-blur-sm">
-                <span>Smart Wedding Planner</span>
-              </div>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 flex items-center gap-3">
-              <span className="bg-gradient-to-r from-slate-200 via-white to-slate-400 bg-clip-text text-transparent">
-                Welcome back, {buyer?.name?.split(' ')[0]}!
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 border border-[#EADBCC] text-[#9B7036] text-[11px] font-bold tracking-wider uppercase shadow-xs">
+                <Sparkles size={12} className="text-[#9B7036]" />
+                Bridal Concierge
               </span>
-              <Hand className="text-white animate-bounce" size={32} />
-            </h1>
-            <p className="bg-gradient-to-r from-slate-300 via-purple-200 to-pink-200 bg-clip-text text-transparent max-w-xl text-sm md:text-base font-light">
-              Here is an overview of your wedding budget, wishlist, and recommendations. Take charge of your wedding preparations with ease!
-            </p>
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="h-12 w-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
-              <Clock size={20} className="text-slate-300" />
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#800020]/5 border border-[#800020]/15 text-[#800020] text-[11px] font-semibold tracking-wide">
+                Smart Wedding Planner
+              </span>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-slate-400">System Time</p>
-              <p className="text-sm font-semibold text-white">{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</p>
+              <h1 className="text-3xl md:text-4xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
+                Welcome back, {buyer?.name?.split(' ')[0] || 'Bride & Groom'}
+              </h1>
+              <p className="text-stone-600 text-sm md:text-base font-sans mt-1 max-w-xl font-normal leading-relaxed">
+                Your curated wedding planning suite. Monitor real-time budget allocations, installment plans, and personalized bridal selections.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0">
+            <div className="px-4 py-3 rounded-2xl bg-white/90 border border-[#EADBCC] shadow-xs flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#FFF5F8] text-[#9B7036] flex items-center justify-center">
+                <Clock size={18} />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase font-bold tracking-wider text-stone-400">Wedding Planner Hub</p>
+                <p className="text-xs font-bold text-stone-800">{new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</p>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Quick Action Shortcuts */}
+        <div className="relative z-10 mt-6 pt-6 border-t border-[#EADBCC]/60 flex items-center gap-3 flex-wrap">
+          <span className="text-xs font-semibold text-stone-500 mr-1">Quick Access:</span>
+          <button
+            onClick={() => navigate('/buyer/marketplace')}
+            className="px-3.5 py-1.5 rounded-xl bg-white/80 hover:bg-white text-stone-800 text-xs font-semibold border border-[#EADBCC] transition-all hover:shadow-xs inline-flex items-center gap-1.5 cursor-pointer"
+          >
+            <ShoppingBag size={13} className="text-[#9B7036]" />
+            Boutique Marketplace
+          </button>
+          <button
+            onClick={() => navigate('/buyer/visual')}
+            className="px-3.5 py-1.5 rounded-xl bg-white/80 hover:bg-white text-stone-800 text-xs font-semibold border border-[#EADBCC] transition-all hover:shadow-xs inline-flex items-center gap-1.5 cursor-pointer"
+          >
+            <Eye size={13} className="text-[#9B7036]" />
+            Find by Photo
+          </button>
+          <button
+            onClick={() => navigate('/buyer/dowry')}
+            className="px-3.5 py-1.5 rounded-xl bg-white/80 hover:bg-white text-stone-800 text-xs font-semibold border border-[#EADBCC] transition-all hover:shadow-xs inline-flex items-center gap-1.5 cursor-pointer"
+          >
+            <BarChart3 size={13} className="text-[#9B7036]" />
+            Budget Estimator
+          </button>
+          <button
+            onClick={() => navigate('/buyer/bnpl')}
+            className="px-3.5 py-1.5 rounded-xl bg-white/80 hover:bg-white text-stone-800 text-xs font-semibold border border-[#EADBCC] transition-all hover:shadow-xs inline-flex items-center gap-1.5 cursor-pointer"
+          >
+            <Banknote size={13} className="text-[#9B7036]" />
+            My BNPL Plans
+          </button>
+        </div>
       </div>
 
-      {/* Modern High-End Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Luxury Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Card 1: Total Budget */}
-        <div className="bg-[#FCFBFB] rounded-2xl p-6 shadow-sm border border-[#FBEFF1] hover-lift relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-[#FFF5F8] rounded-bl-full -z-10 transition-transform group-hover:scale-110" />
+        <div className="bg-white rounded-2xl p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-[#EFEAE4] hover:border-[#ECD4A8] transition-all duration-300 relative overflow-hidden group">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Total Recommended Budget</span>
-              <h3 className="text-2xl font-bold text-gray-900">
+              <span className="text-stone-500 text-[11px] font-bold uppercase tracking-wider">Total Recommended Budget</span>
+              <h3 className="text-2xl font-bold font-serif text-stone-900 mt-1">
                 {noEstimate ? (
-                  <span className="text-sm font-medium text-gray-400">No estimation yet</span>
+                  <span className="text-sm font-sans font-medium text-stone-400">No estimation generated</span>
                 ) : (
                   `PKR ${totalEst.toLocaleString()}`
                 )}
               </h3>
             </div>
-            <div className="p-3 bg-[#FFF5F8] text-[#a37b3d] rounded-xl group-hover:bg-[#ECD4A8] group-hover:text-gray-900 transition-colors duration-300">
-              <Wallet size={24} />
+            <div className="p-3 bg-[#FAF7F2] text-[#9B7036] rounded-2xl border border-[#EADBCC]/60 group-hover:bg-[#9B7036] group-hover:text-white transition-colors duration-300">
+              <Wallet size={20} />
             </div>
           </div>
-          <div className="mt-4 flex items-center justify-between text-xs border-t border-gray-100 pt-3">
-            <span className="text-gray-500">{noEstimate ? 'Complete the wizard' : `${displayLive.length + deletedCats.length} Categories included`}</span>
-            {!noEstimate && <span className="inline-flex items-center text-[#a37b3d] font-semibold gap-0.5">Active <CheckCircle2 size={12} /></span>}
+          <div className="mt-4 flex items-center justify-between text-xs border-t border-stone-100 pt-3">
+            <span className="text-stone-500">{noEstimate ? 'Complete the estimation' : `${displayLive.length + deletedCats.length} Categories included`}</span>
+            {!noEstimate && <span className="inline-flex items-center text-[#9B7036] font-bold gap-1">Active Plan <CheckCircle2 size={13} /></span>}
           </div>
         </div>
 
         {/* Card 2: Total Spent */}
-        <div className="bg-[#FCFBFB] rounded-2xl p-6 shadow-sm border border-[#FBEFF1] hover-lift relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-[#FDF2F3] rounded-bl-full -z-10 transition-transform group-hover:scale-110" />
+        <div className="bg-white rounded-2xl p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-[#EFEAE4] hover:border-[#ECD4A8] transition-all duration-300 relative overflow-hidden group">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Total Spent So Far</span>
-              <h3 className="text-2xl font-bold text-gray-900">
-                {noEstimate ? <span className="text-sm font-medium text-gray-400">—</span> : `PKR ${totalSpent.toLocaleString()}`}
+              <span className="text-stone-500 text-[11px] font-bold uppercase tracking-wider">Total Spent So Far</span>
+              <h3 className="text-2xl font-bold font-serif text-stone-900 mt-1">
+                {noEstimate ? <span className="text-sm font-sans font-medium text-stone-400">—</span> : `PKR ${totalSpent.toLocaleString()}`}
               </h3>
             </div>
-            <div className="p-3 bg-[#FDF2F3] text-rose-500 rounded-xl group-hover:bg-rose-500 group-hover:text-white transition-colors duration-300">
-              <Banknote size={24} />
+            <div className="p-3 bg-[#FFF5F8] text-[#800020] rounded-2xl border border-[#FBEFF1] group-hover:bg-[#800020] group-hover:text-white transition-colors duration-300">
+              <Banknote size={20} />
             </div>
           </div>
-          <div className="mt-4 flex items-center justify-between text-xs border-t border-gray-100 pt-3">
-            <span className="text-gray-500">{noEstimate ? 'No transactions' : `${spentPct}% utilized`}</span>
+          <div className="mt-4 flex items-center justify-between text-xs border-t border-stone-100 pt-3">
+            <span className="text-stone-500">{noEstimate ? 'No transactions' : `${spentPct}% utilized`}</span>
             {!noEstimate && (
-              <span className={`inline-flex items-center font-bold gap-0.5 ${spentPct > 80 ? 'text-red-600' : 'text-emerald-600'}`}>
-                {spentPct > 80 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />} Trend
+              <span className={`inline-flex items-center font-bold gap-0.5 ${spentPct > 80 ? 'text-rose-700' : 'text-emerald-700'}`}>
+                {spentPct > 80 ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />} {spentPct}% of plan
               </span>
             )}
           </div>
         </div>
 
         {/* Card 3: Remaining Budget */}
-        <div className="bg-[#FCFBFB] rounded-2xl p-6 shadow-sm border border-[#FBEFF1] hover-lift relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-[#FEF4F7] rounded-bl-full -z-10 transition-transform group-hover:scale-110" />
+        <div className="bg-white rounded-2xl p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-[#EFEAE4] hover:border-[#ECD4A8] transition-all duration-300 relative overflow-hidden group">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Remaining Balance</span>
-              <h3 className={`text-2xl font-bold ${totalRemain < 0 ? 'text-rose-600 animate-pulse' : 'text-gray-900'}`}>
-                {noEstimate ? <span className="text-sm font-medium text-gray-400">—</span> : `PKR ${totalRemain.toLocaleString()}`}
+              <span className="text-stone-500 text-[11px] font-bold uppercase tracking-wider">Remaining Balance</span>
+              <h3 className={`text-2xl font-bold font-serif mt-1 ${totalRemain < 0 ? 'text-rose-700' : 'text-stone-900'}`}>
+                {noEstimate ? <span className="text-sm font-sans font-medium text-stone-400">—</span> : `PKR ${totalRemain.toLocaleString()}`}
               </h3>
             </div>
-            <div className="p-3 bg-[#FEF4F7] text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
-              <Gem size={24} />
+            <div className="p-3 bg-[#ECFDF5] text-emerald-700 rounded-2xl border border-emerald-100 group-hover:bg-emerald-700 group-hover:text-white transition-colors duration-300">
+              <Gem size={20} />
             </div>
           </div>
-          <div className="mt-4 flex items-center justify-between text-xs border-t border-gray-100 pt-3">
-            <span className="text-gray-500">Available to spend</span>
+          <div className="mt-4 flex items-center justify-between text-xs border-t border-stone-100 pt-3">
+            <span className="text-stone-500">Available to allocate</span>
             {!noEstimate && (
-              <span className={`font-semibold ${totalRemain < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                {totalRemain < 0 ? 'Deficit' : 'In Safe Zone'}
+              <span className={`font-bold ${totalRemain < 0 ? 'text-rose-700' : 'text-emerald-700'}`}>
+                {totalRemain < 0 ? 'Over Budget' : 'Safe Runway'}
               </span>
             )}
           </div>
         </div>
 
         {/* Card 4: Wishlist Items */}
-        <div className="bg-[#FCFBFB] rounded-2xl p-6 shadow-sm border border-[#FBEFF1] hover-lift relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-[#FFF5F8] rounded-bl-full -z-10 transition-transform group-hover:scale-110" />
+        <div className="bg-white rounded-2xl p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-[#EFEAE4] hover:border-[#ECD4A8] transition-all duration-300 relative overflow-hidden group">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Wishlist Items</span>
-              <h3 className="text-2xl font-bold text-gray-900">{wishlist.length}</h3>
+              <span className="text-stone-500 text-[11px] font-bold uppercase tracking-wider">Saved Wishlist</span>
+              <h3 className="text-2xl font-bold font-serif text-stone-900 mt-1">{wishlist.length} <span className="text-sm font-sans font-normal text-stone-500">items</span></h3>
             </div>
-            <div className="p-3 bg-[#FFF5F8] text-rose-400 rounded-xl group-hover:bg-rose-500 group-hover:text-white transition-colors duration-300">
-              <Heart size={24} />
+            <div className="p-3 bg-[#FFF5F8] text-[#800020] rounded-2xl border border-[#FBEFF1] group-hover:bg-[#800020] group-hover:text-white transition-colors duration-300">
+              <Heart size={20} />
             </div>
           </div>
-          <div className="mt-4 flex items-center justify-between text-xs border-t border-gray-100 pt-3">
-            <span className="text-gray-500">Curated by you</span>
+          <div className="mt-4 flex items-center justify-between text-xs border-t border-stone-100 pt-3">
+            <span className="text-stone-500">Curated favorites</span>
             {wishlist.length > 0 && (
               <button 
                 onClick={handleClearWishlist} 
-                className="text-rose-500 hover:text-rose-800 font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors"
+                className="text-stone-400 hover:text-rose-700 font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors"
               >
-                Clear <Trash2 size={12} />
+                Clear all <Trash2 size={12} />
               </button>
             )}
           </div>
@@ -357,64 +389,64 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
 
       {/* My BNPL — repayment status (right under KPI cards) */}
       {bnplRepayments.length > 0 && (
-        <div className="bg-white rounded-3xl border border-[#FBEFF1] shadow-sm p-6 md:p-8 space-y-4">
+        <div className="bg-white rounded-3xl border border-[#EFEAE4] shadow-sm p-6 md:p-8 space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
-              <h2 className="text-xl font-extrabold text-gray-950 flex items-center gap-2">
-                <Banknote className="text-[#a37b3d]" size={22} /> My BNPL
+              <h2 className="text-xl font-bold font-serif text-stone-900 flex items-center gap-2">
+                <Banknote className="text-[#9B7036]" size={22} /> My BNPL Financing Plans
               </h2>
-              <p className="text-xs text-gray-500 mt-1">
-                {bnplRepayments.length} active plan{bnplRepayments.length === 1 ? '' : 's'} · repayment status for financed orders
+              <p className="text-xs text-stone-500 mt-0.5">
+                {bnplRepayments.length} active installment plan{bnplRepayments.length === 1 ? '' : 's'} · bank-backed transparent repayment
               </p>
             </div>
             <button
               type="button"
               onClick={() => navigate('/buyer/bnpl')}
-              className="text-xs font-bold text-[#a37b3d] hover:text-[#8a6633] inline-flex items-center gap-1"
+              className="text-xs font-bold text-[#9B7036] hover:text-[#7E5724] inline-flex items-center gap-1 cursor-pointer"
             >
-              View all applications <ChevronRight size={14} />
+              View detailed repayment schedule <ChevronRight size={14} />
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {bnplRepayments.slice(0, 4).map((r) => (
-              <div key={r.application_no} className="rounded-2xl border border-gray-100 bg-gray-50/80 p-4 space-y-3">
+              <div key={r.application_no} className="rounded-2xl border border-[#EFEAE4] bg-[#FAF7F2]/50 p-4 space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="text-sm font-bold text-gray-900">{r.application_no}</p>
-                    <p className="text-[11px] text-gray-500 font-mono">{r.order_id}</p>
+                    <p className="text-sm font-bold text-stone-900">{r.application_no}</p>
+                    <p className="text-[11px] text-stone-500 font-mono">{r.order_id}</p>
                   </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
                     r.repayment_status === "COMPLETED"
-                      ? "bg-emerald-100 text-emerald-800"
-                      : "bg-amber-100 text-amber-800"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      : "bg-[#FFF8E7] text-[#9B7036] border-[#ECD4A8]"
                   }`}>{r.repayment_status}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <p className="text-gray-400">Total financed</p>
-                    <p className="font-bold text-gray-900">PKR {(r.total_amount || 0).toLocaleString()}</p>
+                    <p className="text-stone-400 text-[11px]">Total Financed</p>
+                    <p className="font-bold text-stone-900">PKR {(r.total_amount || 0).toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400">Monthly installment</p>
-                    <p className="font-bold text-gray-900">PKR {(r.monthly_installment || 0).toLocaleString()}</p>
+                    <p className="text-stone-400 text-[11px]">Monthly Installment</p>
+                    <p className="font-bold text-stone-900">PKR {(r.monthly_installment || 0).toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400">Paid so far</p>
+                    <p className="text-stone-400 text-[11px]">Paid so far</p>
                     <p className="font-bold text-emerald-700">PKR {(r.amount_paid || 0).toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400">Remaining</p>
-                    <p className="font-bold text-amber-700">PKR {(r.amount_remaining || 0).toLocaleString()}</p>
+                    <p className="text-stone-400 text-[11px]">Remaining</p>
+                    <p className="font-bold text-amber-800">PKR {(r.amount_remaining || 0).toLocaleString()}</p>
                   </div>
                 </div>
                 {r.next_due_date && r.repayment_status === "ACTIVE" && (
-                  <p className="text-[11px] text-blue-700">
-                    Next payment due: <b>{new Date(r.next_due_date).toLocaleDateString()}</b>
+                  <p className="text-[11px] text-stone-700 font-medium bg-white/80 px-2.5 py-1 rounded-lg border border-stone-200/60">
+                    Next payment due: <b className="text-stone-900">{new Date(r.next_due_date).toLocaleDateString()}</b>
                   </p>
                 )}
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-2 bg-stone-200 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-emerald-500 rounded-full"
+                    className="h-full bg-[#9B7036] rounded-full transition-all duration-500"
                     style={{
                       width: `${r.total_amount > 0 ? Math.min(100, Math.round(((r.amount_paid || 0) / r.total_amount) * 100)) : 0}%`,
                     }}
@@ -427,9 +459,9 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
             <button
               type="button"
               onClick={() => navigate('/buyer/bnpl')}
-              className="w-full text-center text-xs font-bold text-[#a37b3d] py-2"
+              className="w-full text-center text-xs font-bold text-[#9B7036] py-2 cursor-pointer"
             >
-              +{bnplRepayments.length - 4} more · open My BNPL
+              +{bnplRepayments.length - 4} more plans · open My BNPL
             </button>
           )}
         </div>
@@ -437,21 +469,24 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
 
       {/* No Estimate Beautiful Onboarding Callout */}
       {noEstimate && (
-        <div className="bg-[#FCFBFB] rounded-3xl p-10 text-center border border-[#FBEFF1] shadow-xl max-w-2xl mx-auto space-y-6">
-          <div className="w-20 h-20 bg-[#FFF5F8] rounded-full flex items-center justify-center mx-auto text-[#a37b3d] shadow-inner">
-            <Sparkles size={40} className="animate-pulse" />
+        <div className="bg-white rounded-3xl p-10 text-center border border-[#EADBCC] shadow-sm max-w-2xl mx-auto space-y-6">
+          <div className="w-16 h-16 bg-[#FAF7F2] rounded-2xl flex items-center justify-center mx-auto text-[#9B7036] border border-[#EADBCC]">
+            <Sparkles size={32} />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-extrabold text-gray-950">Unlock Your Personalized Budget Planner</h2>
-            <p className="text-sm text-gray-600 leading-relaxed max-w-lg mx-auto">
-              You haven't generated a budget estimation yet. Complete the Dowry Estimation wizard, specify your preferences, and receive a tailor-made allocation strategy that updates dynamically with your purchases.
+            <h2 className="text-2xl font-bold font-serif text-stone-900">Personalized Wedding Budget Planner</h2>
+            <p className="text-sm text-stone-600 leading-relaxed max-w-lg mx-auto font-sans">
+              Generate a bespoke wedding budget estimation tailored to your family preferences, dowry items, and financial comfort zones.
             </p>
           </div>
           <div className="pt-2">
-            <div className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#ECD4A8] text-gray-900 font-bold shadow-lg shadow-[#ECD4A8]/20 hover:scale-105 transition-transform cursor-pointer">
-              <span>Go to Budget Estimator Wizard</span>
+            <button
+              onClick={() => navigate('/buyer/dowry')}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#9B7036] hover:bg-[#7E5724] text-white font-bold text-sm shadow-md transition-all cursor-pointer"
+            >
+              <span>Launch Budget Estimator Wizard</span>
               <ChevronRight size={16} />
-            </div>
+            </button>
           </div>
         </div>
       )}
@@ -461,23 +496,23 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Left Panel: Category budgets */}
-          <div className="lg:col-span-7 bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-[#FBEFF1] flex flex-col justify-between">
+          <div className="lg:col-span-7 bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-[#EFEAE4] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-extrabold text-gray-950 tracking-tight flex items-center gap-2.5">
-                    <TrendingUp className="text-[#a37b3d]" size={24} /> Budget Allocation
+                  <h2 className="text-2xl font-bold font-serif text-stone-900 tracking-tight flex items-center gap-2.5">
+                    <TrendingUp className="text-[#9B7036]" size={24} /> Budget Allocation
                   </h2>
-                  <p className="text-gray-400 text-xs mt-1">Detailed breakdown of recommended versus spent per category</p>
+                  <p className="text-stone-500 text-xs mt-1">Recommended target vs actual spend per bridal category</p>
                 </div>
                 {mergedDowry?.saved_at && (
-                  <span className="text-[11px] font-medium text-gray-400 bg-gray-100 px-3 py-1.5 rounded-xl">
-                    Created: {new Date(mergedDowry.saved_at).toLocaleDateString()}
+                  <span className="text-[11px] font-medium text-stone-500 bg-[#FAF7F2] px-3 py-1.5 rounded-xl border border-[#EFEAE4]">
+                    Updated: {new Date(mergedDowry.saved_at).toLocaleDateString()}
                   </span>
                 )}
               </div>
 
-              <div className="space-y-4 max-h-[420px] overflow-y-auto pr-1">
+              <div className="space-y-3.5 max-h-[420px] overflow-y-auto pr-1">
                 {displayLive.map(([cat, info]) => {
                   const spent     = info.spent || 0;
                   const est       = info.estimated || 0;
@@ -486,30 +521,30 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
                   const itemPct   = est > 0 ? Math.min(100, Math.round((spent / est) * 100)) : 0;
                   
                   return (
-                    <div key={cat} className="group p-4 bg-[#FCFBFB] hover:bg-[#FFF5F8]/70 rounded-2xl border border-[#FBEFF1] transition-all duration-300">
+                    <div key={cat} className="group p-4 bg-[#FAF7F2]/60 hover:bg-[#FFF5F8]/70 rounded-2xl border border-[#EFEAE4] transition-all duration-300">
                       <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="flex items-center gap-3 min-w-0">
                           <CategoryThumb categoryId={cat} categories={categories} size={40} />
                           <div className="min-w-0">
-                            <p className="text-sm font-bold text-gray-900 capitalize tracking-wide truncate">{catLabel(cat)}</p>
-                            <p className="text-[11px] text-gray-400 font-medium">
-                              Spent: PKR {spent.toLocaleString()} · Total: PKR {est.toLocaleString()}
+                            <p className="text-sm font-bold text-stone-900 capitalize tracking-wide truncate">{catLabel(cat)}</p>
+                            <p className="text-[11px] text-stone-500 font-medium">
+                              Spent: PKR {spent.toLocaleString()} · Allocated: PKR {est.toLocaleString()}
                             </p>
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          <p className={`text-sm font-extrabold ${isOver ? 'text-rose-600' : 'text-emerald-600'}`}>
+                          <p className={`text-sm font-bold font-serif ${isOver ? 'text-rose-700' : 'text-emerald-800'}`}>
                             {isOver ? `Over PKR ${Math.abs(remaining).toLocaleString()}` : `PKR ${remaining.toLocaleString()} left`}
                           </p>
-                          <p className="text-[10px] text-gray-400 font-semibold">
-                            {itemPct}% used
+                          <p className="text-[10px] text-stone-400 font-semibold">
+                            {itemPct}% utilized
                           </p>
                         </div>
                       </div>
                       
-                      <div className="w-full bg-gray-200/80 rounded-full h-1.5 overflow-hidden">
+                      <div className="w-full bg-stone-200/70 rounded-full h-1.5 overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all duration-500 ${isOver ? 'bg-rose-500' : itemPct > 80 ? 'bg-amber-400' : 'bg-violet-500'}`}
+                          className={`h-full rounded-full transition-all duration-500 ${isOver ? 'bg-rose-600' : itemPct > 80 ? 'bg-amber-600' : 'bg-[#9B7036]'}`}
                           style={{ width: `${itemPct}%` }}
                         />
                       </div>
@@ -519,7 +554,7 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
 
                 {deletedCats.length > 0 && (
                   <div className="pt-2 space-y-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-rose-700 px-1">Removed Categories</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-rose-700 px-1">Retired Categories</p>
                     {deletedCats.map(([cat, info]) => {
                       const spent = info.spent || 0;
                       const est = info.estimated || 0;
@@ -531,7 +566,7 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-bold text-rose-900 capitalize truncate">{catLabel(cat)}</p>
                               <p className="text-[11px] text-rose-600 font-medium">
-                                Deleted by admin · PKR {remaining.toLocaleString()} left · Spent PKR {spent.toLocaleString()}
+                                Archived · PKR {remaining.toLocaleString()} left · Spent PKR {spent.toLocaleString()}
                               </p>
                             </div>
                           </div>
@@ -544,14 +579,14 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
             </div>
 
             {/* Overall progress bar */}
-            <div className="mt-8 pt-6 border-t border-gray-100">
-              <div className="flex justify-between text-xs font-semibold text-gray-600 mb-2">
-                <span>Total Budget Progress</span>
-                <span className="text-[#a37b3d]">{spentPct}% used (PKR {totalSpent.toLocaleString()} spent)</span>
+            <div className="mt-8 pt-6 border-t border-stone-100">
+              <div className="flex justify-between text-xs font-semibold text-stone-600 mb-2">
+                <span>Total Wedding Budget Allocation</span>
+                <span className="text-[#9B7036] font-bold">{spentPct}% utilized (PKR {totalSpent.toLocaleString()} spent)</span>
               </div>
-              <div className="w-full bg-gray-100 rounded-full h-3 p-0.5 border border-[#FBEFF1]">
+              <div className="w-full bg-stone-100 rounded-full h-2.5 p-0.5 border border-stone-200">
                 <div
-                  className="bg-gradient-to-r from-violet-600 to-purple-400 h-2 rounded-full transition-all duration-500 shadow-md"
+                  className="bg-gradient-to-r from-[#9B7036] to-[#c09858] h-1.5 rounded-full transition-all duration-500 shadow-xs"
                   style={{ width: `${Math.min(100, spentPct)}%` }}
                 />
               </div>
@@ -605,10 +640,10 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
                     <p className="text-sm font-bold text-gray-800 mb-2 flex items-center gap-1.5">
                       <Sparkles size={16} className="text-[#a37b3d]" /> Smart Advisory
                     </p>
-                    <p className="text-xs text-gray-600 leading-relaxed">
-                      {spentPct < 40 ? 'Your budget is in highly optimized health. Feel free to explore premium collections for your focal items!' :
-                       spentPct < 75 ? 'You have utilized a fair share. Maintain this shopping speed to stay aligned with your targeted limits.' :
-                       'Warning: You are approaching budget limit. Filter marketplace items using the lower bounds in your leftover categories.'}
+                    <p className="text-xs text-stone-600 leading-relaxed font-sans">
+                      {spentPct < 40 ? 'Your bridal budget is in pristine condition. You have ample flexibility to prioritize heirloom jewelry and couture pieces.' :
+                       spentPct < 75 ? 'You are pacing well within your planned limits. Continue balancing retail acquisitions with custom or thrift options.' :
+                       'Advisory: You are approaching target budget limits. Consider reallocating surplus funds from other categories or exploring BNPL financing.'}
                     </p>
                   </div>
                 </div>
@@ -616,22 +651,22 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
 
               {/* Tab 2: By Category List */}
               {analyticsTab === 'By Category' && (
-                <div className="space-y-4 overflow-y-auto max-h-[320px] pr-1">
+                <div className="space-y-3.5 overflow-y-auto max-h-[320px] pr-1">
                   {displayLive.map(([cat, info]) => {
                     const spent = info.spent || 0;
                     const est   = info.estimated || 0;
                     const pct   = est > 0 ? Math.min(100, Math.round((spent / est) * 100)) : 0;
                     return (
-                      <div key={cat} className="space-y-1.5">
+                      <div key={cat} className="space-y-1.5 p-2 rounded-xl bg-[#FAF7F2]/50">
                         <div className="flex justify-between text-xs font-semibold gap-2">
-                          <span className="text-gray-700 capitalize flex items-center gap-2 min-w-0">
+                          <span className="text-stone-800 capitalize flex items-center gap-2 min-w-0 font-medium">
                             <CategoryThumb categoryId={cat} categories={categories} size={24} />
                             <span className="truncate">{catLabel(cat)}</span>
                           </span>
-                          <span className="text-gray-400 shrink-0">PKR {spent.toLocaleString()} / PKR {est.toLocaleString()}</span>
+                          <span className="text-stone-500 font-serif shrink-0">PKR {spent.toLocaleString()} / {est.toLocaleString()}</span>
                         </div>
-                        <div className="w-full bg-gray-100 rounded-full h-2">
-                          <div className={`h-2 rounded-full transition-all duration-300 ${pct > 90 ? 'bg-rose-500' : pct > 70 ? 'bg-amber-400' : 'bg-gradient-to-r from-violet-600 to-purple-400'}`}
+                        <div className="w-full bg-stone-200/60 rounded-full h-1.5">
+                          <div className={`h-1.5 rounded-full transition-all duration-300 ${pct > 90 ? 'bg-rose-600' : pct > 70 ? 'bg-amber-600' : 'bg-[#9B7036]'}`}
                             style={{ width: `${pct}%` }} />
                         </div>
                       </div>
@@ -639,7 +674,7 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
                   })}
                   {deletedCats.length > 0 && (
                     <div className="pt-2 border-t border-rose-100 space-y-2">
-                      <p className="text-[10px] font-bold text-rose-700 uppercase">Removed</p>
+                      <p className="text-[10px] font-bold text-rose-700 uppercase">Archived</p>
                       {deletedCats.map(([cat, info]) => (
                         <div key={`d-${cat}`} className="flex items-center justify-between text-xs gap-2">
                           <span className="flex items-center gap-2 text-rose-800 capitalize">
@@ -664,18 +699,18 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
                         const rem   = info.remaining ?? (info.estimated - (info.spent || 0));
                         const isOvr = rem < 0;
                         return (
-                          <div key={cat} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0 text-xs font-medium">
-                            <span className="text-gray-700 capitalize">{catLabel(cat)}</span>
-                            <span className={`font-bold ${isOvr ? 'text-rose-600' : 'text-emerald-600'}`}>
+                          <div key={cat} className="flex items-center justify-between py-2 border-b border-stone-100 last:border-0 text-xs font-medium">
+                            <span className="text-stone-700 capitalize">{catLabel(cat)}</span>
+                            <span className={`font-bold font-serif ${isOvr ? 'text-rose-700' : 'text-emerald-800'}`}>
                               {isOvr ? `-PKR ${Math.abs(rem).toLocaleString()}` : `PKR ${rem.toLocaleString()}`}
                             </span>
                           </div>
                         );
                       })}
                   </div>
-                  <div className="pt-4 border-t border-gray-100 flex justify-between text-sm font-extrabold text-gray-800">
-                    <span>Net Surplus Balance</span>
-                    <span className={totalRemain < 0 ? 'text-rose-600 animate-pulse' : 'text-emerald-600'}>
+                  <div className="pt-4 border-t border-stone-100 flex justify-between text-sm font-bold text-stone-900">
+                    <span>Net Available Surplus</span>
+                    <span className={`font-serif ${totalRemain < 0 ? 'text-rose-700' : 'text-emerald-800'}`}>
                       PKR {totalRemain.toLocaleString()}
                     </span>
                   </div>
@@ -685,18 +720,18 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
               {/* Tab 4: Projections */}
               {analyticsTab === 'Projections' && (
                 <div className="space-y-3 my-auto">
-                  <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400 mb-2">Simulated Scenarios (Based on estimation)</p>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-stone-400 mb-2">Simulated Scenarios</p>
                   {[
-                    { label: 'Savings Focus (70%)', total: Math.round(totalEst * 0.70), desc: 'Aggressive bargains & rentals', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-                    { label: 'Target Model (85%)', total: Math.round(totalEst * 0.85), desc: 'Average vendor negotiations', color: 'bg-[#FFF5F8] text-[#a37b3d] border-[#FBEFF1]' },
-                    { label: 'Upper Bound (100%)', total: totalEst, desc: 'Full premium purchasing tier', color: 'bg-rose-50 text-rose-700 border-rose-100' },
+                    { label: 'Smart Thrift & Rentals (70%)', total: Math.round(totalEst * 0.70), desc: 'Focus on sustainable pre-loved bridalwear', color: 'bg-emerald-50/60 text-emerald-900 border-emerald-100' },
+                    { label: 'Target Model (85%)', total: Math.round(totalEst * 0.85), desc: 'Mix of designer retail & seasonal promotions', color: 'bg-[#FAF7F2] text-[#9B7036] border-[#EADBCC]' },
+                    { label: 'Couture Luxury (100%)', total: totalEst, desc: 'Full custom boutique specifications', color: 'bg-rose-50/60 text-[#800020] border-rose-100' },
                   ].map(p => (
                     <div key={p.label} className={`p-3.5 rounded-2xl border flex items-center justify-between ${p.color}`}>
                       <div>
                         <p className="text-xs font-bold">{p.label}</p>
-                        <p className="text-[10px] text-gray-500 font-medium mt-0.5">{p.desc}</p>
+                        <p className="text-[10px] text-stone-500 font-medium mt-0.5">{p.desc}</p>
                       </div>
-                      <span className="text-xs font-extrabold bg-white px-3 py-1.5 rounded-xl shadow-sm border border-black/5">
+                      <span className="text-xs font-bold font-serif bg-white px-3 py-1.5 rounded-xl shadow-xs border border-stone-200/60 text-stone-900">
                         PKR {p.total.toLocaleString()}
                       </span>
                     </div>
@@ -712,32 +747,32 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
 
       {/* Purchased Items Section */}
       {purchasedItems.length > 0 && (
-        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-[#FBEFF1]">
+        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-[#EFEAE4]">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-extrabold text-gray-950 tracking-tight flex items-center gap-2">
-                <ShoppingBag className="text-[#a37b3d]" size={22} /> Items Already Purchased
+              <h2 className="text-xl font-bold font-serif text-stone-900 tracking-tight flex items-center gap-2">
+                <ShoppingBag className="text-[#9B7036]" size={22} /> Acquired Wedding Essentials
               </h2>
-              <p className="text-gray-400 text-xs mt-0.5">Products you've bought from completed orders</p>
+              <p className="text-stone-500 text-xs mt-0.5">Verified products purchased across your completed orders</p>
             </div>
-            <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg">
-              {purchasedItems.length} items
+            <span className="text-xs font-bold px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-full">
+              {purchasedItems.length} items acquired
             </span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[280px] overflow-y-auto pr-1">
             {purchasedItems.slice(0, 9).map((item, i) => (
-              <div key={i} className="p-3 bg-emerald-50/30 rounded-2xl border border-emerald-100/60">
-                <p className="text-xs font-bold text-gray-900 truncate">{item.title}</p>
-                <p className="text-[10px] text-gray-500 capitalize">{item.major_category?.replace(/_/g, ' ')}</p>
-                <div className="flex justify-between items-center mt-2 pt-1.5 border-t border-emerald-100/40">
-                  <span className="text-xs font-extrabold text-emerald-700">PKR {(item.price || 0).toLocaleString()}</span>
-                  <span className="text-[10px] text-gray-400">Qty: {item.qty}</span>
+              <div key={i} className="p-3.5 bg-[#FAF7F2]/60 rounded-2xl border border-[#EFEAE4]">
+                <p className="text-xs font-bold text-stone-900 truncate">{item.title}</p>
+                <p className="text-[10px] text-stone-500 capitalize">{item.major_category?.replace(/_/g, ' ')}</p>
+                <div className="flex justify-between items-center mt-2.5 pt-2 border-t border-stone-200/60">
+                  <span className="text-xs font-bold font-serif text-emerald-800">PKR {(item.price || 0).toLocaleString()}</span>
+                  <span className="text-[10px] text-stone-400 font-medium">Qty: {item.qty}</span>
                 </div>
               </div>
             ))}
           </div>
           {purchasedItems.length > 9 && (
-            <p className="text-xs text-gray-400 mt-3 text-center font-medium">+{purchasedItems.length - 9} more purchased items</p>
+            <p className="text-xs text-stone-400 mt-3 text-center font-medium">+{purchasedItems.length - 9} more purchased items</p>
           )}
         </div>
       )}
@@ -748,15 +783,15 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
           
           {/* Wishlist Grid */}
           {wishlist.length > 0 && (
-            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-[#FBEFF1]">
+            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-[#EFEAE4]">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-xl font-extrabold text-gray-950 tracking-tight flex items-center gap-2">
-                    <Heart className="text-[#a37b3d] fill-[#a37b3d]" size={22} /> Wishlist Collection
+                  <h2 className="text-xl font-bold font-serif text-stone-900 tracking-tight flex items-center gap-2">
+                    <Heart className="text-[#800020] fill-[#800020]" size={20} /> Curated Wishlist
                   </h2>
-                  <p className="text-gray-400 text-xs mt-0.5">Quick access to your curated design highlights</p>
+                  <p className="text-stone-500 text-xs mt-0.5">Quick access to your saved bridal selections</p>
                 </div>
-                <span className="text-xs font-semibold px-2.5 py-1 bg-[#FFF5F8] text-[#a37b3d] rounded-lg">
+                <span className="text-xs font-bold px-3 py-1 bg-[#FFF5F8] text-[#800020] border border-[#FBEFF1] rounded-full">
                   {wishlist.length} Saved
                 </span>
               </div>
@@ -766,64 +801,64 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
                   <div
                     key={item.product_id}
                     onClick={() => onViewProduct && onViewProduct(item)}
-                    className="group p-4 bg-[#FFF5F8]/30 hover:bg-[#FFF5F8]/60 rounded-2xl border border-[#FBEFF1]/60 transition-all duration-300 cursor-pointer flex flex-col justify-between"
+                    className="group p-4 bg-[#FAF7F2]/50 hover:bg-[#FAF7F2] rounded-2xl border border-[#EFEAE4] hover:border-[#ECD4A8] transition-all duration-300 cursor-pointer flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[10px] font-bold text-[#a37b3d] uppercase tracking-wider bg-white px-2 py-0.5 rounded-md border border-[#FBEFF1]">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold text-[#9B7036] uppercase tracking-wider bg-white px-2 py-0.5 rounded-md border border-[#EADBCC]">
                           {catLabel(item.major_category)}
                         </span>
-                        <ArrowUpRight size={14} className="text-[#ECD4A8] opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <ArrowUpRight size={14} className="text-[#9B7036] opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
-                      <p className="text-xs font-bold text-gray-900 line-clamp-2 leading-snug">{item.title}</p>
+                      <p className="text-xs font-bold text-stone-900 line-clamp-2 leading-snug">{item.title}</p>
                     </div>
-                    <div className="flex justify-between items-center mt-4 pt-2.5 border-t border-[#FBEFF1]/50">
-                      <span className="text-[10px] text-gray-400 font-semibold">Original Price</span>
-                      <span className="text-sm font-extrabold text-[#a37b3d]">PKR {(item.price || 0).toLocaleString()}</span>
+                    <div className="flex justify-between items-center mt-4 pt-2.5 border-t border-stone-200/60">
+                      <span className="text-[10px] text-stone-400 font-semibold">Price</span>
+                      <span className="text-sm font-bold font-serif text-stone-900">PKR {(item.price || 0).toLocaleString()}</span>
                     </div>
                   </div>
                 ))}
               </div>
               
               {wishlist.length > 6 && (
-                <p className="text-xs text-gray-400 mt-4 text-center font-medium">+{wishlist.length - 6} more saved items in your catalog</p>
+                <p className="text-xs text-stone-400 mt-4 text-center font-medium">+{wishlist.length - 6} more saved items in your catalog</p>
               )}
             </div>
           )}
 
           {/* Recently Viewed Grid */}
           {recentlyViewed.length > 0 && (
-            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-[#FBEFF1]">
+            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-[#EFEAE4]">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-xl font-extrabold text-gray-950 tracking-tight flex items-center gap-2">
-                    <Eye className="text-[#a37b3d]" size={22} /> Recently Explored
+                  <h2 className="text-xl font-bold font-serif text-stone-900 tracking-tight flex items-center gap-2">
+                    <Eye className="text-[#9B7036]" size={20} /> Recently Explored
                   </h2>
-                  <p className="text-gray-400 text-xs mt-0.5">Pick up right where you left off browsing</p>
+                  <p className="text-stone-500 text-xs mt-0.5">Continue where you left off</p>
                 </div>
-                <span className="text-xs font-semibold px-2.5 py-1 bg-[#FFF5F8] border border-[#FDF2F3] text-[#a37b3d] rounded-lg">
+                <span className="text-xs font-bold px-3 py-1 bg-[#FAF7F2] border border-[#EADBCC] text-[#9B7036] rounded-full">
                   History
                 </span>
               </div>
 
-              <div className="space-y-3.5 max-h-[360px] overflow-y-auto pr-1">
+              <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
                 {recentlyViewed.slice(0, 6).map((item) => (
                   <div
                     key={item.product_id}
                     onClick={() => onViewProduct && onViewProduct(item)}
-                    className="group flex items-center gap-4 p-3 bg-gray-50/60 hover:bg-[#FFF5F8]/30 rounded-2xl border border-gray-100/80 transition-all duration-300 cursor-pointer"
+                    className="group flex items-center gap-3.5 p-3.5 bg-[#FAF7F2]/50 hover:bg-[#FAF7F2] rounded-2xl border border-[#EFEAE4] hover:border-[#ECD4A8] transition-all duration-300 cursor-pointer"
                   >
-                    <div className="w-12 h-12 bg-[#FFF5F8] text-[#a37b3d] border border-[#FDF2F3] rounded-xl flex items-center justify-center shrink-0 shadow-sm">
-                      <ShoppingBag size={20} />
+                    <div className="w-11 h-11 bg-white text-[#9B7036] border border-[#EADBCC] rounded-xl flex items-center justify-center shrink-0 shadow-xs">
+                      <ShoppingBag size={18} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-gray-950 truncate group-hover:text-[#a37b3d] transition-colors">{item.title}</p>
-                      <p className="text-[10px] text-gray-400 font-semibold capitalize mt-0.5">{catLabel(item.major_category)}</p>
+                      <p className="text-xs font-bold text-stone-900 truncate group-hover:text-[#9B7036] transition-colors">{item.title}</p>
+                      <p className="text-[10px] text-stone-400 font-semibold capitalize mt-0.5">{catLabel(item.major_category)}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-xs font-extrabold text-gray-950">PKR {(item.price || 0).toLocaleString()}</p>
-                      <span className="text-[9px] text-[#a37b3d] font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-end gap-0.5 mt-0.5">
-                        View <ChevronRight size={10} />
+                      <p className="text-xs font-bold font-serif text-stone-900">PKR {(item.price || 0).toLocaleString()}</p>
+                      <span className="text-[10px] text-[#9B7036] font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-end gap-0.5 mt-0.5">
+                        View <ChevronRight size={11} />
                       </span>
                     </div>
                   </div>
@@ -831,7 +866,6 @@ export default function BuyerDashboard({ buyer, onViewProduct }) {
               </div>
             </div>
           )}
-
         </div>
       )}
     </div>

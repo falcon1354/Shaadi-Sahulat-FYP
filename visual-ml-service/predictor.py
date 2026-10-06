@@ -37,7 +37,7 @@ from config import (
     CATEGORY_CONFIDENCE_THRESHOLD, MAX_RESULTS_DEFAULT,
     MODEL_DIR, BACKBONE,
 )
-from model import load_model_for_inference
+from model import load_model_for_inference, is_model_fine_tuned
 from description_generator import generate_description
 from tfidf_engine import description_to_tfidf_dict, preprocess_text
 from embedding_index import hybrid_search
@@ -45,6 +45,24 @@ from embedding_index import hybrid_search
 # Minimum quality gate: if even the best result scores below this in ALL
 # similarity dimensions, we consider the uploaded image non-matching.
 _GATE_THRESHOLD = 0.40
+
+# Map free-text dress words → catalog category ids
+_DESC_CATEGORY_KEYWORDS = (
+    ("bridal_lehenga", ("lehenga", "lengha", "lehanga", "ghagra", "gagra")),
+    ("bridal_sharara", ("sharara", "gharara", "garara")),
+    ("bridal_saree",   ("saree", "sari", "sarree")),
+)
+
+
+def _infer_category_from_text(text: str) -> str | None:
+    """Pick a dress category from the buyer's typed description, if any."""
+    if not text:
+        return None
+    t = text.lower()
+    for cat_id, words in _DESC_CATEGORY_KEYWORDS:
+        if any(w in t for w in words):
+            return cat_id
+    return None
 
 
 class VisualPredictor:
@@ -130,7 +148,7 @@ class VisualPredictor:
             }
 
         # ── Stage 2: Category prediction ──────────────────────────────────
-        s2 = self._stage2_category(image, preferred_category)
+        s2 = self._stage2_category(image, preferred_category, user_description)
         if not s2["passed"]:
             return {
                 "status":              "rejected",
@@ -140,7 +158,8 @@ class VisualPredictor:
                 "closest_category":    s2.get("category"),
                 "suggestion": (
                     f"Upload an image of a supported dress type: "
-                    f"{', '.join(CATEGORY_LABELS.values())}"
+                    f"{', '.join(CATEGORY_LABELS.values())}. "
+                    f"Also name the style in your description (e.g. lehenga, sharara, saree)."
                 ),
                 "supported_categories": CATEGORY_IDS,
                 "validation": {
@@ -170,9 +189,18 @@ class VisualPredictor:
 
         query_tfidf = description_to_tfidf_dict(combined_desc)
 
-        # Category for search: always honour the user's explicit choice when provided.
-        # This gives the UI category selector true priority over the model's prediction.
-        search_category = preferred_category if preferred_category else predicted_category
+        # Category for search:
+        #  - honour explicit UI / description category when provided
+        #  - if the classifier is unsure (pretrained-only / low confidence),
+        #    search ALL bridal categories so a good visual match is not filtered out
+        if preferred_category and preferred_category in CATEGORY_IDS:
+            search_category = preferred_category
+        elif s2.get("from_description") and predicted_category in CATEGORY_IDS:
+            search_category = predicted_category
+        elif confidence < 0.45 or s2.get("soft_passed"):
+            search_category = None
+        else:
+            search_category = predicted_category
 
         results = hybrid_search(
             query_embedding  = query_embedding,
@@ -278,10 +306,15 @@ class VisualPredictor:
         self,
         image:              Image.Image,
         preferred_category: str | None,
+        user_description:   str = "",
     ) -> dict:
         """
         Predict dress category via EfficientNet-B0 + 128-dim embedding.
-        Falls back to demo mode (random) if no trained model is loaded.
+
+        The category head is only reliable after fine-tuning. With ImageNet-only
+        weights, softmax confidence often sits near ~33% for 3 classes — so we
+        soft-pass using (in order): UI hint → description keywords → top class,
+        and let the similarity gate reject non-dress uploads.
         """
         if self.model is None:
             return {
@@ -302,26 +335,40 @@ class VisualPredictor:
 
         predicted_cat = CATEGORY_IDS[top_idx] if top_idx < len(CATEGORY_IDS) else CATEGORY_IDS[0]
         used_preferred = False
+        from_description = False
+        soft_passed = False
 
-        # If confidence is borderline and user gave a hint, trust them
+        # 1) Explicit UI category always wins
         if preferred_category and preferred_category in CATEGORY_IDS:
             pref_idx  = CATEGORY_IDS.index(preferred_category)
-            pref_conf = float(probs[pref_idx])
-            if top_conf < 0.65 and pref_conf > 0.25:
-                predicted_cat  = preferred_category
-                top_conf       = max(top_conf, pref_conf)
-                used_preferred = True
+            pref_conf = float(probs[pref_idx]) if pref_idx < len(probs) else top_conf
+            predicted_cat  = preferred_category
+            top_conf       = max(top_conf, pref_conf, CATEGORY_CONFIDENCE_THRESHOLD)
+            used_preferred = True
 
-        if top_conf < CATEGORY_CONFIDENCE_THRESHOLD:
-            return {
-                "passed":     False,
-                "category":   predicted_cat,
-                "confidence": top_conf,
-                "reason": (
-                    f"Uploaded image does not clearly match any supported dress category "
-                    f"(confidence {top_conf:.0%} < threshold {CATEGORY_CONFIDENCE_THRESHOLD:.0%})."
-                ),
-            }
+        # 2) Infer from buyer description (e.g. "red bridal lehenga…")
+        if not used_preferred:
+            inferred = _infer_category_from_text(user_description)
+            if inferred:
+                predicted_cat = inferred
+                top_conf = max(top_conf, CATEGORY_CONFIDENCE_THRESHOLD)
+                from_description = True
+
+        # 3) Soft-pass when classifier is not fine-tuned / confidence is middling
+        fine_tuned = is_model_fine_tuned()
+        if not used_preferred and not from_description:
+            if (not fine_tuned) or top_conf >= CATEGORY_CONFIDENCE_THRESHOLD:
+                soft_passed = not fine_tuned and top_conf < CATEGORY_CONFIDENCE_THRESHOLD
+            else:
+                return {
+                    "passed":     False,
+                    "category":   predicted_cat,
+                    "confidence": top_conf,
+                    "reason": (
+                        f"Uploaded image does not clearly match any supported dress category "
+                        f"(confidence {top_conf:.0%} < threshold {CATEGORY_CONFIDENCE_THRESHOLD:.0%})."
+                    ),
+                }
 
         # Extract 1280-dim backbone features for similarity search
         # (must match catalog embedding space — see embedding_index.py)
@@ -335,6 +382,8 @@ class VisualPredictor:
             "confidence":   top_conf,
             "embedding":    embedding,
             "used_preferred": used_preferred,
+            "from_description": from_description,
+            "soft_passed": soft_passed,
             "all_probabilities": {
                 CATEGORY_IDS[i]: round(float(probs[i]), 4)
                 for i in range(min(NUM_CLASSES, len(probs)))

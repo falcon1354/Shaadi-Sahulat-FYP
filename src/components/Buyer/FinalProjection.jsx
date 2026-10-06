@@ -10,11 +10,62 @@ import bnplApi from '../../api/bnplApi';
 import { filterDisplayBudgetEntries, isRetiredCategory, splitAllocatedAndDeleted } from '../../lib/dowryDisplay';
 import { spentByCategoryFromOrders, applySpentToBudgets } from '../../lib/dowrySpent';
 import CategoryThumb from '../Dowry/CategoryThumb';
+import BuyerPageHero from '../Common/BuyerPageHero';
+import dashboardHeroImg from '../../assets/hero/Buyer_Dashboard.jpg';
+import dashOverviewImg from '../../assets/hero/Dash_Overview.jpg';
+import dashCategoriesImg from '../../assets/hero/Dash_Categories.jpg';
+import dashCashflowImg from '../../assets/hero/Dash_Cashflow.jpg';
+import dashHistoryImg from '../../assets/hero/Dash_History.jpg';
 import {
   Sparkles, DollarSign, Wallet, ArrowUpRight, Info, HelpCircle,
   CheckCircle2, ChevronRight, BarChart3, PieChart as PieIcon, AlertCircle, ShoppingBag,
   ShieldAlert, ArrowDownRight, Compass, Receipt, CreditCard, Calendar
 } from 'lucide-react';
+
+function DashSectionBanner({ image, title, subtitle, rightSlot = null, dark = false }) {
+  return (
+    <div
+      className={`relative overflow-hidden rounded-2xl border ${
+        dark
+          ? 'border-white/10 text-white'
+          : 'border-[#EADBCC]/80 bg-gradient-to-r from-[#FAF7F2] to-[#FDFBF7]'
+      }`}
+    >
+      <div
+        className={`absolute inset-0 bg-cover bg-center pointer-events-none ${dark ? 'opacity-40' : 'opacity-30'}`}
+        style={{ backgroundImage: `url(${image})` }}
+        aria-hidden
+      />
+      <div
+        className={`absolute inset-0 pointer-events-none ${
+          dark
+            ? 'bg-gradient-to-r from-[#1a0a1e] via-[#1a0a1e]/80 to-transparent'
+            : 'bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/90 to-[#FAF7F2]/40'
+        }`}
+      />
+      <div className="relative z-10 p-4 sm:p-5 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className={`w-16 h-12 sm:w-20 sm:h-14 rounded-xl overflow-hidden border shrink-0 shadow-sm ${
+            dark ? 'border-white/20' : 'border-[#EADBCC]'
+          }`}>
+            <img src={image} alt="" className="w-full h-full object-cover" />
+          </div>
+          <div className="min-w-0">
+            <h2 className={`text-base sm:text-lg font-bold truncate ${dark ? 'text-white' : 'text-gray-900'}`}>
+              {title}
+            </h2>
+            {subtitle && (
+              <p className={`text-xs font-light ${dark ? 'text-slate-300' : 'text-gray-500'}`}>
+                {subtitle}
+              </p>
+            )}
+          </div>
+        </div>
+        {rightSlot}
+      </div>
+    </div>
+  );
+}
 
 function readDowry(buyerId) {
   try {
@@ -205,19 +256,18 @@ export default function FinalProjection({ buyer }) {
   if (!dowry?.category_budgets) {
     return (
       <div className="animate-fade-in space-y-6 max-w-5xl mx-auto">
-        <div className="bg-gradient-to-tr from-[#1a0a1e] via-[#2d2d44] to-[#3d3455] rounded-3xl p-8 text-white shadow-xl relative overflow-hidden border border-white/10">
-          <div className="absolute right-0 bottom-0 translate-y-12 translate-x-12 w-64 h-64 bg-slate-400/10 rounded-full blur-2xl pointer-events-none" />
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-slate-300 text-xs font-bold tracking-wide mb-3">
-            <span>👰</span> Buyer Portal · Dashboard
-          </div>
-          <h1 className="text-3xl font-black mb-2 flex items-center gap-2 bg-gradient-to-r from-slate-200 via-white to-slate-400 bg-clip-text text-transparent">
-            <BarChart3 size={32} className="text-white" /> Dashboard & Analytics
-          </h1>
-          <p className="bg-gradient-to-r from-slate-300 via-purple-200 to-pink-200 bg-clip-text text-transparent font-light max-w-xl">
-            Live budget analytics, category charts, and real-time tracking metrics.
-          </p>
-        </div>
+        <BuyerPageHero
+          variant="dark"
+          badge={<><BarChart3 size={13} /> Buyer Portal · Dashboard</>}
+          title="Dashboard & Analytics"
+          subtitle="Live budget analytics, category charts, and real-time tracking metrics."
+          image={dashboardHeroImg}
+          imageAlt="Wedding planning dashboard mood"
+        />
         <div className="bg-white rounded-3xl p-16 text-center border border-[#FBEFF1] shadow-xl">
+          <div className="w-28 h-20 rounded-2xl overflow-hidden mx-auto mb-6 border border-[#EADBCC] shadow-sm">
+            <img src={dashboardHeroImg} alt="" className="w-full h-full object-cover" />
+          </div>
           <div className="w-20 h-20 bg-[#FFF5F8] text-[#a37b3d] rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-[#FDF2F3]">
             <Compass className="animate-pulse" size={40} />
           </div>
@@ -293,23 +343,14 @@ export default function FinalProjection({ buyer }) {
 
   return (
     <div className="animate-fade-in space-y-8 max-w-5xl mx-auto pb-12">
-      {/* Header Banner */}
-      <div className="bg-gradient-to-tr from-[#1a0a1e] via-[#2d2d44] to-[#3d3455] rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-white/10">
-        <div className="absolute right-0 bottom-0 translate-y-12 translate-x-12 w-64 h-64 bg-slate-400/10 rounded-full blur-2xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-slate-300 text-xs font-bold tracking-wide mb-3">
-              <span>👰</span> Buyer Portal · Dashboard
-            </div>
-            <h1 className="text-3xl font-black mb-1.5 flex items-center gap-2 tracking-tight">
-              <span className="bg-gradient-to-r from-slate-200 via-white to-slate-400 bg-clip-text text-transparent flex items-center gap-2">
-                <BarChart3 size={32} className="text-white" /> Dashboard Analytics
-              </span>
-            </h1>
-            <p className="bg-gradient-to-r from-slate-300 via-purple-200 to-pink-200 bg-clip-text text-transparent font-light text-sm sm:text-base">
-              Synchronized with your real-time Dowry Estimator data and purchase history.
-            </p>
-          </div>
+      <BuyerPageHero
+        variant="dark"
+        badge={<><BarChart3 size={13} /> Buyer Portal · Dashboard</>}
+        title="Dashboard Analytics"
+        subtitle="Synchronized with your real-time Dowry Estimator data and purchase history."
+        image={dashboardHeroImg}
+        imageAlt="Wedding planning dashboard mood"
+        rightSlot={(
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-3 shrink-0 flex items-center gap-3">
             <div className="p-2 bg-white/15 rounded-xl text-white shadow-sm">
               <Sparkles size={18} />
@@ -319,8 +360,8 @@ export default function FinalProjection({ buyer }) {
               <p className="text-sm font-black text-white">{formatPKRFull(totalEst)}</p>
             </div>
           </div>
-        </div>
-      </div>
+        )}
+      />
 
       {/* KPI Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -371,21 +412,24 @@ export default function FinalProjection({ buyer }) {
       </div>
 
       {/* Modern Tabs Navigator */}
-      <div className="flex gap-1.5 bg-gray-100/80 backdrop-blur-md p-1.5 rounded-2xl border border-gray-200/40 w-fit">
+      <div className="flex flex-wrap gap-1.5 bg-gray-100/80 backdrop-blur-md p-1.5 rounded-2xl border border-gray-200/40 w-fit">
         {[
-          { id: 'overview',  label: 'Overview',    icon: <CheckCircle2 size={14} /> },
-          { id: 'category',  label: 'Categories Breakdown', icon: <BarChart3 size={14} /> },
-          { id: 'remaining', label: 'Remaining Cashflow',   icon: <Wallet size={14} /> },
-          { id: 'history',   label: 'Purchase History',     icon: <Receipt size={14} /> },
+          { id: 'overview',  label: 'Overview',              icon: <CheckCircle2 size={14} />, img: dashOverviewImg },
+          { id: 'category',  label: 'Categories Breakdown',  icon: <BarChart3 size={14} />,    img: dashCategoriesImg },
+          { id: 'remaining', label: 'Remaining Cashflow',    icon: <Wallet size={14} />,       img: dashCashflowImg },
+          { id: 'history',   label: 'Purchase History',      icon: <Receipt size={14} />,      img: dashHistoryImg },
         ].map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
               activeTab === tab.id
                 ? 'bg-white text-[#a37b3d] shadow-md border border-[#FBEFF1]'
                 : 'text-gray-500 hover:text-gray-950 hover:bg-white/40'
             }`}>
+            <span className="w-7 h-7 rounded-lg overflow-hidden border border-[#EADBCC]/70 shrink-0 hidden sm:block">
+              <img src={tab.img} alt="" className="w-full h-full object-cover" />
+            </span>
             {tab.icon}
             <span>{tab.label}</span>
           </button>
@@ -395,6 +439,11 @@ export default function FinalProjection({ buyer }) {
       {/* TAB: Overview */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
+          <DashSectionBanner
+            image={dashOverviewImg}
+            title="Overview"
+            subtitle="Charts and aggregate progress across your bridal budget"
+          />
           {/* Visual Charts Container */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Bar Chart: Estimated vs Spent — scrollable so all categories stay reachable */}
@@ -499,10 +548,16 @@ export default function FinalProjection({ buyer }) {
 
       {/* TAB: By Category */}
       {activeTab === 'category' && (
-        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-[#FBEFF1] space-y-6">
+        <div className="space-y-6">
+          <DashSectionBanner
+            image={dashCategoriesImg}
+            title="Categories Breakdown"
+            subtitle="Detailed category metrics highlighting budget headroom vs current expenditure"
+          />
+          <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-[#FBEFF1] space-y-6">
           <div>
             <h2 className="text-lg font-bold text-gray-900 mb-1">Estimated vs Actual Category Spending</h2>
-            <p className="text-xs text-gray-400 font-light font-medium">Detailed category metrics highlighting budget headroom vs current expenditure.</p>
+            <p className="text-xs text-gray-400 font-light font-medium">Per-category allocation, spend, and remaining balance.</p>
           </div>
           
           <div className="space-y-6">
@@ -557,14 +612,21 @@ export default function FinalProjection({ buyer }) {
             })}
           </div>
         </div>
+        </div>
       )}
 
       {/* TAB: Remaining */}
       {activeTab === 'remaining' && (
-        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-[#FBEFF1] space-y-6">
+        <div className="space-y-6">
+          <DashSectionBanner
+            image={dashCashflowImg}
+            title="Remaining Cashflow"
+            subtitle="Available balance leftovers remaining in each custom category"
+          />
+          <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-[#FBEFF1] space-y-6">
           <div>
             <h2 className="text-lg font-bold text-gray-900 mb-1">Cashflow Headroom</h2>
-            <p className="text-xs text-gray-400 font-light font-medium">Available balance leftovers remaining in each custom category.</p>
+            <p className="text-xs text-gray-400 font-light font-medium">See how much disposable budget remains per category.</p>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -600,18 +662,30 @@ export default function FinalProjection({ buyer }) {
             })}
           </div>
         </div>
+        </div>
       )}
 
       {/* TAB: Purchase History */}
       {activeTab === 'history' && (
         <div className="space-y-6">
+          <DashSectionBanner
+            image={dashHistoryImg}
+            title="Purchase History"
+            subtitle="Completed payments from delivered orders and BNPL installments"
+          />
+
           {/* Lifetime total stat */}
           <div className="bg-gradient-to-tr from-[#1a0a1e] via-[#2d2d44] to-[#3d3455] rounded-3xl p-6 text-white shadow-md border border-white/10 relative overflow-hidden">
-            <div className="absolute right-0 bottom-0 translate-y-12 translate-x-12 w-48 h-48 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+            <div
+              className="absolute inset-0 bg-cover bg-center opacity-35 pointer-events-none"
+              style={{ backgroundImage: `url(${dashHistoryImg})` }}
+              aria-hidden
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#1a0a1e] via-[#1a0a1e]/85 to-transparent pointer-events-none" />
             <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-white/15 rounded-2xl text-white shadow-sm">
-                  <Receipt size={22} />
+                <div className="w-14 h-14 rounded-2xl overflow-hidden border border-white/20 shadow-sm shrink-0">
+                  <img src={dashHistoryImg} alt="" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <p className="text-[10px] uppercase font-bold tracking-wider text-slate-300">Lifetime Total Spent</p>
@@ -650,9 +724,16 @@ export default function FinalProjection({ buyer }) {
             </div>
 
             {filteredHistory.length === 0 ? (
-              <div className="py-12 text-center">
-                <div className="text-5xl mb-3">🧾</div>
-                <p className="text-sm text-gray-500 font-medium">No completed payments in this period.</p>
+              <div className="py-12 text-center relative overflow-hidden rounded-2xl">
+                <div className="absolute inset-0 opacity-15 pointer-events-none">
+                  <img src={dashHistoryImg} alt="" className="w-full h-full object-cover" />
+                </div>
+                <div className="relative z-10">
+                  <div className="w-20 h-14 rounded-xl overflow-hidden border border-[#EADBCC] mx-auto mb-3 shadow-sm">
+                    <img src={dashHistoryImg} alt="" className="w-full h-full object-cover" />
+                  </div>
+                  <p className="text-sm text-gray-500 font-medium">No completed payments in this period.</p>
+                </div>
               </div>
             ) : (
               <>

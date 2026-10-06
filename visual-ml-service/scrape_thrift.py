@@ -61,23 +61,37 @@ SKIP_RE = re.compile(
 )
 
 SOURCES = [
-    # Wedding dress
+    # Wedding dress — denser scrape
     {"url": "https://www.olx.com.pk/items/q-used-bridal-lehenga",
-     "major": "wedding_dress", "sub": "bridal", "item": "bridal_lehenga", "limit": 6, "min_price": 8000},
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_lehenga", "limit": 14, "min_price": 8000},
     {"url": "https://www.olx.com.pk/items/q-bridal-lehenga",
-     "major": "wedding_dress", "sub": "bridal", "item": "bridal_lehenga", "limit": 6, "min_price": 12000},
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_lehenga", "limit": 14, "min_price": 12000},
+    {"url": "https://www.olx.com.pk/items/q-red-bridal-lehenga",
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_lehenga", "limit": 10, "min_price": 10000},
+    {"url": "https://www.olx.com.pk/items/q-maroon-lehenga",
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_lehenga", "limit": 10, "min_price": 8000},
     {"url": "https://www.olx.com.pk/items/q-used-sharara",
-     "major": "wedding_dress", "sub": "bridal", "item": "bridal_sharara", "limit": 5, "min_price": 5000},
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_sharara", "limit": 12, "min_price": 5000},
+    {"url": "https://www.olx.com.pk/items/q-bridal-sharara",
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_sharara", "limit": 12, "min_price": 6000},
     {"url": "https://www.olx.com.pk/items/q-bridal-maxi",
-     "major": "wedding_dress", "sub": "bridal", "item": "bridal_maxi", "limit": 5, "min_price": 5000},
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_maxi", "limit": 12, "min_price": 5000},
+    {"url": "https://www.olx.com.pk/items/q-wedding-maxi",
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_maxi", "limit": 10, "min_price": 5000},
     {"url": "https://www.olx.com.pk/items/q-used-saree",
-     "major": "wedding_dress", "sub": "bridal", "item": "bridal_saree", "limit": 4, "min_price": 3000},
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_saree", "limit": 12, "min_price": 3000},
+    {"url": "https://www.olx.com.pk/items/q-bridal-saree",
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_saree", "limit": 12, "min_price": 4000},
     {"url": "https://www.olx.com.pk/items/q-used-sherwani",
-     "major": "wedding_dress", "sub": "groom", "item": "groom_sherwani", "limit": 5, "min_price": 5000},
+     "major": "wedding_dress", "sub": "groom", "item": "groom_sherwani", "limit": 12, "min_price": 5000},
+    {"url": "https://www.olx.com.pk/items/q-groom-sherwani",
+     "major": "wedding_dress", "sub": "groom", "item": "groom_sherwani", "limit": 12, "min_price": 6000},
     {"url": "https://www.olx.com.pk/items/q-prince-coat",
-     "major": "wedding_dress", "sub": "groom", "item": "groom_prince_coat", "limit": 4, "min_price": 4000},
+     "major": "wedding_dress", "sub": "groom", "item": "groom_prince_coat", "limit": 10, "min_price": 4000},
     {"url": "https://www.olx.com.pk/items/q-groom-shalwar-kameez",
-     "major": "wedding_dress", "sub": "groom", "item": "groom_shalwar_kameez", "limit": 4, "min_price": 3000},
+     "major": "wedding_dress", "sub": "groom", "item": "groom_shalwar_kameez", "limit": 10, "min_price": 3000},
+    {"url": "https://www.olx.com.pk/items/q-wedding-suit-groom",
+     "major": "wedding_dress", "sub": "groom", "item": "groom_suit", "limit": 8, "min_price": 5000},
     # Furniture
     {"url": "https://www.olx.com.pk/items/q-used-sofa-set",
      "major": "furniture", "sub": "sofa_set", "item": "sofa_set", "limit": 6, "min_price": 8000},
@@ -304,19 +318,23 @@ def delete_dummy_thrift(db) -> int:
     return result.deleted_count
 
 
-def scrape_thrift() -> None:
+def scrape_thrift(wedding_only: bool = False, reset: bool = True) -> None:
     client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=10000)
     db = client[MONGO_DB]
     seller = ensure_thrift_seller(db)
 
-    deleted = delete_dummy_thrift(db)
-    log(f"Deleted {deleted} incorrect thrift listings")
+    if reset and not wedding_only:
+        deleted = delete_dummy_thrift(db)
+        log(f"Deleted {deleted} incorrect thrift listings")
+    elif wedding_only:
+        log("Dress-only thrift mode: keeping existing thrift listings, adding more dresses")
 
     inserted = 0
     skipped = 0
     by_cat: dict[str, int] = {}
+    sources = [s for s in SOURCES if (not wedding_only or s.get("major") == "wedding_dress")]
 
-    for src in SOURCES:
+    for src in sources:
         log(f"\n-> OLX  {src['url']}")
         html = fetch_html(src["url"])
         rows = parse_olx_listings(html, src) if html else []
@@ -356,13 +374,17 @@ def scrape_thrift() -> None:
     except Exception:
         pass
     total = db[PRODUCTS_COLLECTION].count_documents({"marketplace_type": "thrift"})
+    dress_n = db[PRODUCTS_COLLECTION].count_documents({
+        "marketplace_type": "thrift", "major_category": "wedding_dress",
+    })
     client.close()
 
     log(f"\nInserted {inserted} thrift products, skipped {skipped} duplicates")
-    log(f"Thrift listings now in DB: {total}")
+    log(f"Thrift listings now in DB: {total} (dresses: {dress_n})")
     for k, v in sorted(by_cat.items()):
         log(f"  {k}: +{v}")
 
 
 if __name__ == "__main__":
-    scrape_thrift()
+    wedding_only = "--wedding-only" in sys.argv or "--dresses" in sys.argv
+    scrape_thrift(wedding_only=wedding_only, reset=not wedding_only)

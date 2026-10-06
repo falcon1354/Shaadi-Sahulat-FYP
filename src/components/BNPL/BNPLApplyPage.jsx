@@ -1,21 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { CreditCard, Check, Building2, ShieldCheck, Upload, FileText, CheckCircle2, ArrowRight, ArrowLeft, Clock, Sparkles } from "lucide-react";
 import bnplApi from "../../api/bnplApi";
 import orderApi from "../../api/orderApi";
 
-/**
- * BNPLApplyPage — buyer submits a BNPL application for a specific order.
- * Flow: pre-check eligibility → pick bank → enter IBAN + upload docs → submit.
- *
- * Spec updates:
- *   - CNIC auto-format XXXXX-XXXXXXX-X
- *   - Validate CNIC entered matches account-creation CNIC (buyer.cnic)
- *   - Validate CNIC OCR extracted matches entered CNIC (best-effort on preview)
- *   - IBAN format-validation TEMPORARILY DISABLED (commented, kept for later)
- *   - IBAN-related errors surface in Step 2's "Review & Continue", not Step 3
- */
-
-// CNIC formatter — auto-insert dashes as the user types (XXXXX-XXXXXXX-X)
 function formatCnic(raw) {
   const digits = String(raw || "").replace(/\D/g, "").slice(0, 13);
   let out = digits;
@@ -44,7 +32,7 @@ export default function BNPLApplyPage({ buyer }) {
   });
   const [files, setFiles] = useState({ cnic_front: null, cnic_back: null, utility_bill: null });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");    // surfaces INSIDE step 2 now
+  const [error, setError] = useState("");
   const [result, setResult] = useState(null);
   const [ocrBusy, setOcrBusy] = useState(false);
   const [ocrHint, setOcrHint] = useState("");
@@ -66,45 +54,32 @@ export default function BNPLApplyPage({ buyer }) {
     finally { setLoading(false); }
   };
 
-  // Called from Step 2 "Review & Continue" — validates everything before
-  // moving to Step 3. IBAN/CNIC errors show in Step 2, not Step 3.
   const reviewAndContinue = () => {
     setError("");
 
-    if (!form.bankId) { setError("Please select a bank."); return; }
+    if (!form.bankId) { setError("Please select a financing partner bank."); return; }
 
-    // IBAN format-validation temporarily disabled per spec.
-    // ---- (kept commented; re-enable when required)
-    // const ibanClean = String(form.iban || "").toUpperCase().replace(/\s/g, "");
-    // const bank = banks.find(b => b.bank_id === form.bankId);
-    // if (!/^PK\d{2}[A-Z]{4}\d{16}$/.test(ibanClean)) {
-    //   setError("IBAN format is invalid (must be 24 chars, start with PK).");
-    //   return;
-    // }
-    // if (bank?.code && !ibanClean.startsWith("PK") ) { ... }
     if (!form.iban || form.iban.replace(/\s/g, "").length < 5) {
-      setError("Please enter an IBAN.");
+      setError("Please enter your bank IBAN number.");
       return;
     }
 
-    if (!form.accountTitle.trim()) { setError("Please enter the account title."); return; }
+    if (!form.accountTitle.trim()) { setError("Please specify the exact account title."); return; }
 
-    // CNIC must be present + fully formatted
     if (!isFullCnic(form.cnicNumber)) {
-      setError("CNIC must match XXXXX-XXXXXXX-X format.");
+      setError("CNIC must match XXXXX-XXXXXXX-X format (13 digits).");
       return;
     }
-    // CNIC must match the CNIC used at account creation
+
     const acctCnic = String(buyer?.cnic || "").replace(/[^0-9]/g, "");
     const entered  = form.cnicNumber.replace(/[^0-9]/g, "");
     if (acctCnic && acctCnic !== entered) {
-      setError("Entered CNIC does not match the CNIC used at account creation.");
+      setError("Entered CNIC does not match your verified profile CNIC.");
       return;
     }
 
-    // Documents required
     if (!files.cnic_front || !files.cnic_back || !files.utility_bill) {
-      setError("Please upload CNIC front, CNIC back, and utility bill.");
+      setError("Please upload CNIC front, CNIC back, and utility bill verification documents.");
       return;
     }
 
@@ -117,17 +92,17 @@ export default function BNPLApplyPage({ buyer }) {
     if (key !== "cnic_front" || !file || !buyer?.buyer_id) return;
 
     setOcrBusy(true);
-    setOcrHint("Reading CNIC from image…");
+    setOcrHint("Scanning CNIC text via OCR…");
     try {
       const r = await bnplApi.previewCnicOcr(buyer.buyer_id, file);
       if (r?.found && r.extracted_cnic) {
         setForm((prev) => ({ ...prev, cnicNumber: formatCnic(r.extracted_cnic) }));
-        setOcrHint(`CNIC detected: ${formatCnic(r.extracted_cnic)}. You can edit if incorrect.`);
+        setOcrHint(`CNIC recognized: ${formatCnic(r.extracted_cnic)}`);
       } else {
-        setOcrHint("Could not read CNIC from the image — please type it below.");
+        setOcrHint("Automatic scan inconclusive — please confirm your CNIC manually below.");
       }
     } catch {
-      setOcrHint("Could not read CNIC from the image — please type it below.");
+      setOcrHint("Automatic scan inconclusive — please confirm your CNIC manually below.");
     } finally {
       setOcrBusy(false);
     }
@@ -151,12 +126,11 @@ export default function BNPLApplyPage({ buyer }) {
       });
       if (!r.success) throw new Error(r.error || "Submission failed");
 
-      // Post-submit: if OCR extracted a CNIC, verify it matches the entered CNIC
       if (r.ocr?.extracted_cnic) {
         const ocr = r.ocr.extracted_cnic.replace(/[^0-9]/g, "");
         const entered = form.cnicNumber.replace(/[^0-9]/g, "");
         if (ocr && entered && ocr !== entered) {
-          setError(`⚠ CNIC entered (${form.cnicNumber}) does not match uploaded CNIC image (${r.ocr.extracted_cnic}). Please re-upload the correct document.`);
+          setError(`CNIC entered (${form.cnicNumber}) does not match uploaded card (${r.ocr.extracted_cnic}).`);
           setLoading(false);
           setStep(2);
           return;
@@ -167,179 +141,260 @@ export default function BNPLApplyPage({ buyer }) {
     finally { setLoading(false); }
   };
 
-  if (!order) return <div className="p-8 text-center text-gray-500">Loading order...</div>;
+  if (!order) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="w-10 h-10 border-3 border-[#ECD4A8] border-t-[#9B7036] rounded-full animate-spin mb-4" />
+        <p className="text-sm font-serif italic text-gray-500">Loading order verification...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-2">BNPL Application</h1>
-      <p className="text-sm text-gray-500 mb-4">Order #{orderId} • PKR {order.total_amount.toLocaleString()}</p>
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      {/* Header */}
+      <div>
+        <span className="text-[11px] font-bold tracking-widest uppercase text-[#9B7036] bg-[#FAF3E8] px-3 py-1 rounded-full border border-[#ECD4A8]/40">
+          Installment Application
+        </span>
+        <h1 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 tracking-tight mt-2 mb-1">
+          Apply for BNPL Financing
+        </h1>
+        <p className="text-xs text-gray-500 font-light">
+          Commission Ref #{orderId} · Value: <strong className="text-gray-900 font-mono">PKR {order.total_amount.toLocaleString()}</strong>
+        </p>
+      </div>
 
-      <div className="flex items-center mb-6 text-xs">
-        {["Eligibility", "Bank & Documents", "Submit", "Done"].map((label, i) => (
-          <React.Fragment key={label}>
-            <div className={`flex items-center ${step >= i + 1 ? "text-[#a37b3d]" : "text-gray-400"}`}>
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${step >= i + 1 ? "bg-[#a37b3d] text-white" : "bg-gray-200"}`}>{i + 1}</div>
-              <span className="ml-1">{label}</span>
+      {/* Stepper */}
+      <div className="grid grid-cols-4 gap-2 border-b border-[#EFEAE4] pb-6">
+        {[
+          { num: 1, title: 'Eligibility' },
+          { num: 2, title: 'Bank Info' },
+          { num: 3, title: 'Review' },
+          { num: 4, title: 'Completed' },
+        ].map((s) => (
+          <div key={s.num} className="flex flex-col items-center text-center">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+              step >= s.num ? 'bg-[#9B7036] text-white shadow-xs' : 'bg-[#FAF7F2] border border-[#E8E2D9] text-gray-400'
+            }`}>
+              {step > s.num ? <Check size={14} /> : s.num}
             </div>
-            {i < 3 && <div className={`flex-1 h-px mx-2 ${step > i + 1 ? "bg-[#a37b3d]" : "bg-gray-200"}`} />}
-          </React.Fragment>
+            <span className={`text-[10px] font-bold uppercase tracking-wider mt-1.5 ${
+              step >= s.num ? 'text-gray-900' : 'text-gray-400'
+            }`}>{s.title}</span>
+          </div>
         ))}
       </div>
 
-      {/* Errors on step 1 only — step 2 errors render inline in step 2 (see below) */}
-      {step !== 2 && error && <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 mb-4 text-sm">{error}</div>}
-
-      {step === 1 && (
-        <div className="bg-white rounded-2xl shadow p-6">
-          <h2 className="text-lg font-semibold mb-2">Step 1: Check Eligibility</h2>
-          <p className="text-sm text-gray-600 mb-4">We'll verify your profile and check for any active BNPL plans.</p>
-          <ul className="text-sm text-gray-700 list-disc pl-5 mb-4">
-            <li>Cart total: PKR {order.total_amount.toLocaleString()}</li>
-            <li>Minimum BNPL amount: PKR 5,000</li>
-            {order.total_amount < 5000 && <li>Amounts under PKR 5,000 are auto-approved instantly.</li>}
-          </ul>
-          <button onClick={checkElig} disabled={loading}
-            className="w-full py-2.5 bg-[#a37b3d] hover:bg-[#8a6633] text-white rounded-xl text-sm font-semibold disabled:opacity-50">
-            {loading ? "Checking..." : "Check Eligibility"}
-          </button>
+      {step !== 2 && error && (
+        <div className="bg-rose-50 border border-rose-200 text-[#800020] rounded-2xl p-4 text-xs font-semibold">
+          {error}
         </div>
       )}
 
-      {step === 2 && (
-        <div className="bg-white rounded-2xl shadow p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Step 2: Bank & Documents</h2>
-          <div>
-            <label className="text-xs font-semibold text-gray-600">SELECT BANK</label>
-            <select value={form.bankId} onChange={e => setForm({ ...form, bankId: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
-              <option value="">— Select Bank —</option>
-              {banks.map(b => <option key={b.bank_id} value={b.bank_id}>{b.name} ({b.code})</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-gray-600">IBAN</label>
-            <input value={form.iban} onChange={e => setForm({ ...form, iban: e.target.value })}
-              placeholder="PK36HBL1234567890123456"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono uppercase" />
-            <p className="text-[10px] text-gray-400 mt-0.5">Format validation temporarily disabled.</p>
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-gray-600">ACCOUNT TITLE</label>
-            <input value={form.accountTitle} onChange={e => setForm({ ...form, accountTitle: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-gray-600">PLAN</label>
-            <div className="flex gap-2">
-              {[3, 6].map(m => (
-                <button key={m} type="button"
-                  onClick={() => setForm({ ...form, planMonths: m })}
-                  className={`flex-1 py-2 rounded-lg border text-sm font-semibold ${form.planMonths === m ? "border-[#a37b3d] bg-[#FFF5F8] text-[#a37b3d]" : "border-gray-200 text-gray-600"}`}>
-                  {m} Months
-                </button>
-              ))}
+      {/* Step 1: Pre-check */}
+      {step === 1 && (
+        <div className="bg-white rounded-2xl border border-[#EADBCC] p-6 shadow-xs space-y-5">
+          <div className="flex items-center gap-2.5 pb-4 border-b border-[#EFEAE4]">
+            <div className="w-8 h-8 rounded-xl bg-[#FAF7F2] border border-[#EFEAE4] flex items-center justify-center text-[#9B7036]">
+              <ShieldCheck size={18} />
+            </div>
+            <div>
+              <h2 className="text-base font-serif font-bold text-gray-900">Pre-Underwriting Verification</h2>
+              <p className="text-xs text-gray-400 font-light">We will check your profile limits and current installment capacity.</p>
             </div>
           </div>
 
-          {/* Upload docs first — CNIC front triggers OCR autofill into the field below */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-gray-600 block">REQUIRED DOCUMENTS</label>
-            {[
-              { key: "cnic_front", label: "CNIC (Front)" },
-              { key: "cnic_back", label: "CNIC (Back)" },
-              { key: "utility_bill", label: "Utility Bill (Electricity/Gas)" },
-            ].map(doc => (
-              <div key={doc.key} className="flex items-center justify-between border border-gray-200 rounded-lg p-2 gap-2">
-                <span className="text-sm shrink-0">{doc.label}</span>
-                <input
-                  type="file"
-                  accept="image/*,application/pdf"
-                  onChange={(e) => handleDocChange(doc.key, e.target.files?.[0] || null)}
-                  className="text-xs min-w-0"
-                />
-              </div>
-            ))}
-            {(ocrBusy || ocrHint) && (
-              <p className={`text-xs ${ocrBusy ? "text-amber-700" : "text-gray-600"}`}>
-                {ocrBusy ? "Reading CNIC from image…" : ocrHint}
+          <div className="space-y-2 text-xs text-gray-600 leading-relaxed bg-[#FAF7F2] p-4 rounded-xl border border-[#EFEAE4]">
+            <p className="flex justify-between font-medium">
+              <span>Order Subtotal:</span>
+              <span className="font-bold text-gray-900 font-mono">PKR {order.total_amount.toLocaleString()}</span>
+            </p>
+            <p className="flex justify-between font-medium">
+              <span>Minimum BNPL Threshold:</span>
+              <span className="font-bold text-gray-900 font-mono">PKR 5,000</span>
+            </p>
+            {order.total_amount < 5000 && (
+              <p className="text-emerald-700 font-bold pt-2 border-t border-[#E8E2D9]">
+                ✓ Amounts under PKR 5,000 qualify for rapid automated clearance.
               </p>
             )}
           </div>
 
-          <div>
-            <label className="text-xs font-semibold text-gray-600">
-              CNIC NUMBER (auto-filled from front image when possible — you can type/edit)
-            </label>
-            <input
-              value={form.cnicNumber}
-              onChange={e => setForm({ ...form, cnicNumber: formatCnic(e.target.value) })}
-              maxLength={15}
-              placeholder="35202-1234567-1"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono"
-            />
-          </div>
-
-          {/* IBAN / CNIC errors surface here — inside Step 2 */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 text-sm">
-              {error}
-            </div>
-          )}
-
-          <button onClick={reviewAndContinue}
-            className="w-full py-2.5 bg-[#a37b3d] hover:bg-[#8a6633] text-white rounded-xl text-sm font-semibold">
-            Review & Continue
+          <button
+            onClick={checkElig}
+            disabled={loading}
+            className="w-full py-3 bg-[#9B7036] hover:bg-[#7E5724] text-white rounded-xl text-xs font-bold transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+          >
+            {loading ? "Verifying Financial Solvency..." : "Proceed to Bank Details →"}
           </button>
         </div>
       )}
 
-      {step === 3 && (
-        <div className="bg-white rounded-2xl shadow p-6 space-y-3">
-          <h2 className="text-lg font-semibold">Step 3: Review & Submit</h2>
-          <p className="text-sm">Order: <b>{orderId}</b> • PKR {order.total_amount.toLocaleString()}</p>
-          <p className="text-sm">Bank: <b>{banks.find(b => b.bank_id === form.bankId)?.name}</b></p>
-          <p className="text-sm">IBAN: <b className="font-mono">{form.iban}</b></p>
-          <p className="text-sm">CNIC: <b className="font-mono">{form.cnicNumber}</b></p>
-          <p className="text-sm">Plan: <b>{form.planMonths} months</b></p>
-          <p className="text-sm">Documents: CNIC front, CNIC back, utility bill</p>
-          {eligibility?.auto_approve && (
-            <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg p-2 text-xs">
-              ✓ Eligible for auto-approval (amount &lt; PKR 5,000).
+      {/* Step 2: Banking & Documents */}
+      {step === 2 && (
+        <div className="bg-white rounded-2xl border border-[#EADBCC] p-6 shadow-xs space-y-5">
+          <div className="pb-4 border-b border-[#EFEAE4]">
+            <h2 className="text-base font-serif font-bold text-gray-900">Partner Bank & Identification</h2>
+            <p className="text-xs text-gray-400 font-light">Provide your banking coordinates and verification documents for underwriter approval.</p>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-1">Financing Partner Bank</label>
+              <select
+                value={form.bankId}
+                onChange={e => setForm({ ...form, bankId: e.target.value })}
+                className="w-full px-3.5 py-2.5 border border-[#E8E2D9] rounded-xl text-xs font-semibold focus:ring-2 focus:ring-[#9B7036]/20 focus:border-[#9B7036] outline-none"
+              >
+                <option value="">— Choose Underwriting Bank —</option>
+                {banks.map(b => <option key={b.bank_id} value={b.bank_id}>{b.name} ({b.code})</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-1">IBAN Number</label>
+              <input
+                value={form.iban}
+                onChange={e => setForm({ ...form, iban: e.target.value })}
+                placeholder="PK36HBL1234567890123456"
+                className="w-full px-3.5 py-2.5 border border-[#E8E2D9] rounded-xl text-xs font-mono font-bold uppercase focus:ring-2 focus:ring-[#9B7036]/20 focus:border-[#9B7036] outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-1">Account Title</label>
+              <input
+                value={form.accountTitle}
+                onChange={e => setForm({ ...form, accountTitle: e.target.value })}
+                className="w-full px-3.5 py-2.5 border border-[#E8E2D9] rounded-xl text-xs font-semibold focus:ring-2 focus:ring-[#9B7036]/20 focus:border-[#9B7036] outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-1.5">Tenure Plan</label>
+              <div className="grid grid-cols-2 gap-3">
+                {[3, 6].map(m => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setForm({ ...form, planMonths: m })}
+                    className={`py-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                      form.planMonths === m
+                        ? "border-[#9B7036] bg-[#FAF3E8] text-[#9B7036] shadow-xs"
+                        : "border-[#E8E2D9] bg-white text-gray-600 hover:border-gray-400"
+                    }`}
+                  >
+                    {m} Equal Monthly Installments
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Document upload grid */}
+            <div className="space-y-3 pt-2">
+              <label className="block text-[10px] font-bold text-gray-600 uppercase tracking-wider">Required Proof of Identity</label>
+              {[
+                { key: "cnic_front", label: "CNIC Document (Front Side)" },
+                { key: "cnic_back", label: "CNIC Document (Back Side)" },
+                { key: "utility_bill", label: "Recent Utility Bill (Proof of Residence)" },
+              ].map(doc => (
+                <div key={doc.key} className="flex flex-col sm:flex-row sm:items-center justify-between border border-[#E8E2D9] bg-[#FAF7F2] rounded-xl p-3 gap-2">
+                  <span className="text-xs font-semibold text-gray-800">{doc.label}</span>
+                  <input
+                    type="file"
+                    accept="image/*,application/pdf"
+                    onChange={(e) => handleDocChange(doc.key, e.target.files?.[0] || null)}
+                    className="text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border file:border-[#E8E2D9] file:text-xs file:font-bold file:bg-white file:text-[#9B7036] cursor-pointer"
+                  />
+                </div>
+              ))}
+              {(ocrBusy || ocrHint) && (
+                <p className={`text-xs ${ocrBusy ? "text-[#9B7036] animate-pulse" : "text-gray-600"}`}>
+                  {ocrHint}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-1">
+                CNIC Number (13 Digits)
+              </label>
+              <input
+                value={form.cnicNumber}
+                onChange={e => setForm({ ...form, cnicNumber: formatCnic(e.target.value) })}
+                maxLength={15}
+                placeholder="35202-1234567-1"
+                className="w-full px-3.5 py-2.5 border border-[#E8E2D9] rounded-xl text-xs font-mono font-bold focus:ring-2 focus:ring-[#9B7036]/20 focus:border-[#9B7036] outline-none"
+              />
+            </div>
+          </div>
+
+          {error && (
+            <div className="bg-rose-50 border border-rose-200 text-[#800020] rounded-xl p-3.5 text-xs font-semibold">
+              {error}
             </div>
           )}
-          <label className="flex items-center text-xs text-gray-600">
-            <input type="checkbox" defaultChecked className="mr-2" />
-            I confirm all information is correct and complete.
-          </label>
-          <div className="flex gap-2">
-            <button onClick={() => setStep(2)} className="flex-1 py-2 border border-gray-200 rounded-lg text-sm">Back</button>
-            <button onClick={submit} disabled={loading}
-              className="flex-1 py-2 bg-[#a37b3d] hover:bg-[#8a6633] text-white rounded-lg text-sm font-semibold disabled:opacity-50">
-              {loading ? "Submitting..." : "SUBMIT BNPL APPLICATION"}
+
+          <button
+            onClick={reviewAndContinue}
+            className="w-full py-3 bg-[#9B7036] hover:bg-[#7E5724] text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+          >
+            Review & Continue →
+          </button>
+        </div>
+      )}
+
+      {/* Step 3: Review */}
+      {step === 3 && (
+        <div className="bg-white rounded-2xl border border-[#EADBCC] p-6 shadow-xs space-y-5">
+          <div className="pb-4 border-b border-[#EFEAE4]">
+            <h2 className="text-base font-serif font-bold text-gray-900">Step 3: Review & Final Submission</h2>
+            <p className="text-xs text-gray-400 font-light">Confirm all coordinates before submitting to underwriting.</p>
+          </div>
+
+          <div className="space-y-2.5 text-xs bg-[#FAF7F2] p-4 rounded-xl border border-[#EFEAE4]">
+            <div className="flex justify-between"><span className="text-gray-500">Order ID:</span><span className="font-mono font-bold text-gray-900">{orderId}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Principal Amount:</span><span className="font-mono font-bold text-gray-900">PKR {order.total_amount.toLocaleString()}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Bank Partner:</span><span className="font-bold text-gray-900">{banks.find(b => b.bank_id === form.bankId)?.name}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">IBAN:</span><span className="font-mono font-bold text-gray-900">{form.iban}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">CNIC:</span><span className="font-mono font-bold text-gray-900">{form.cnicNumber}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Selected Tenure:</span><span className="font-bold text-[#9B7036]">{form.planMonths} Months</span></div>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button
+              onClick={() => setStep(2)}
+              className="flex-1 py-3 border border-[#E8E2D9] rounded-xl text-xs font-bold text-gray-700 hover:bg-[#FAF7F2]"
+            >
+              ← Back
+            </button>
+            <button
+              onClick={submit}
+              disabled={loading}
+              className="flex-1 py-3 bg-[#9B7036] hover:bg-[#7E5724] text-white rounded-xl text-xs font-bold transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+            >
+              {loading ? "Submitting Application..." : "Submit Application"}
             </button>
           </div>
         </div>
       )}
 
+      {/* Step 4: Complete */}
       {step === 4 && result && (
-        <div className="bg-white rounded-2xl shadow p-6 space-y-3">
-          <div className="text-center text-4xl">✅</div>
-          <h2 className="text-lg font-semibold text-center">Application Submitted!</h2>
-          <p className="text-center text-sm">Application #<b>{result.application.application_no}</b></p>
-          <p className="text-center text-sm">Status: <b>{result.application.status}</b></p>
-          {result.application.status === "APPROVED" && (
-            <p className="text-center text-xs text-green-700">
-              Auto-approved! Your offer letter is ready. Visit your BNPL dashboard to accept.
-            </p>
-          )}
-          {result.ocr?.extracted_cnic && (
-            <p className="text-center text-xs text-gray-500">
-              OCR extracted CNIC: <span className="font-mono">{result.ocr.extracted_cnic}</span> (confidence: {Math.round((result.ocr.confidence || 0) * 100)}%)
-            </p>
-          )}
-          <button onClick={() => navigate("/buyer/bnpl")}
-            className="w-full py-2.5 bg-[#a37b3d] hover:bg-[#8a6633] text-white rounded-xl text-sm font-semibold">
-            Track Application
+        <div className="bg-white rounded-3xl border border-[#EADBCC] p-8 shadow-xs text-center space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-[#1B6B4D]">
+            <CheckCircle2 size={30} />
+          </div>
+          <h2 className="text-xl font-serif font-bold text-gray-900">Application Lodged Successfully</h2>
+          <p className="text-xs text-gray-500 font-light">
+            Application Reference #{result.application?.application_no}
+          </p>
+          <button
+            onClick={() => navigate("/buyer/bnpl")}
+            className="mt-4 px-6 py-3 bg-[#9B7036] hover:bg-[#7E5724] text-white rounded-xl text-xs font-bold transition-all shadow-xs"
+          >
+            Go to BNPL Portfolio →
           </button>
         </div>
       )}

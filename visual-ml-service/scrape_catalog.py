@@ -16,6 +16,7 @@ import json
 import os
 import re
 import sys
+import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -57,23 +58,44 @@ CATALOG_SELLER_ID = "SELLER_001"
 # How many products to keep per source (small categories stay smaller)
 DEFAULT_LIMIT = 6
 MAIN_LIMIT = 8
+DRESS_LIMIT = 24
 
 SOURCES = [
-    # ── 1. Wedding dress ────────────────────────────────────────────────
+    # ── 1. Wedding dress (bridal + groom) — higher limits ─────────────────
+    {"kind": "shopify", "url": "https://www.zenia.pk/collections/bridal-lehenga-choli/products.json",
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_lehenga", "limit": DRESS_LIMIT},
+    {"kind": "shopify", "url": "https://www.zenia.pk/collections/bridal-lehenga/products.json",
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_lehenga", "limit": DRESS_LIMIT},
+    {"kind": "shopify", "url": "https://www.zenia.pk/collections/lehenga/products.json",
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_lehenga", "limit": 18},
     {"kind": "shopify", "url": "https://www.zenia.pk/collections/bridal-maxi/products.json",
-     "major": "wedding_dress", "sub": "bridal", "item": "bridal_maxi", "limit": 6},
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_maxi", "limit": DRESS_LIMIT},
+    {"kind": "shopify", "url": "https://www.zenia.pk/collections/maxi-dresses/products.json",
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_maxi", "limit": 18},
     {"kind": "shopify", "url": "https://www.zenia.pk/collections/sharara-dresses/products.json",
-     "major": "wedding_dress", "sub": "bridal", "item": "bridal_sharara", "limit": 6},
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_sharara", "limit": DRESS_LIMIT},
+    {"kind": "shopify", "url": "https://www.zenia.pk/collections/sharara/products.json",
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_sharara", "limit": 18},
+    {"kind": "shopify", "url": "https://www.zenia.pk/collections/saree/products.json",
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_saree", "limit": 18},
     {"kind": "html_json", "url": "https://laam.com/nodes/women-saree-407",
-     "major": "wedding_dress", "sub": "bridal", "item": "bridal_saree", "limit": 6, "currency": "PKR"},
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_saree", "limit": DRESS_LIMIT, "currency": "PKR"},
+    {"kind": "html_json", "url": "https://laam.com/nodes/women-lehenga-296",
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_lehenga", "limit": DRESS_LIMIT, "currency": "PKR"},
     {"kind": "html_json", "url": "https://haseensofficial.com/nodes/women-lehenga-296",
-     "major": "wedding_dress", "sub": "bridal", "item": "bridal_lehenga", "limit": 6, "currency": "GBP"},
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_lehenga", "limit": DRESS_LIMIT, "currency": "GBP"},
+    {"kind": "html_json", "url": "https://haseensofficial.com/nodes/women-sharara",
+     "major": "wedding_dress", "sub": "bridal", "item": "bridal_sharara", "limit": 18, "currency": "GBP"},
     {"kind": "wc", "base": "https://naushemian.com", "category_slug": "sherwani",
-     "major": "wedding_dress", "sub": "groom", "item": "groom_sherwani", "limit": 5},
+     "major": "wedding_dress", "sub": "groom", "item": "groom_sherwani", "limit": DRESS_LIMIT},
     {"kind": "wc", "base": "https://naushemian.com", "category_slug": "shalwar-kameez",
-     "major": "wedding_dress", "sub": "groom", "item": "groom_shalwar_kameez", "limit": 5},
+     "major": "wedding_dress", "sub": "groom", "item": "groom_shalwar_kameez", "limit": 18},
     {"kind": "wc", "base": "https://naushemian.com", "category_slug": "prince-coat",
-     "major": "wedding_dress", "sub": "groom", "item": "groom_prince_coat", "limit": 5},
+     "major": "wedding_dress", "sub": "groom", "item": "groom_prince_coat", "limit": 18},
+    {"kind": "wc", "base": "https://naushemian.com", "search": "sherwani",
+     "major": "wedding_dress", "sub": "groom", "item": "groom_sherwani", "limit": 18},
+    {"kind": "wc", "base": "https://naushemian.com", "search": "prince coat",
+     "major": "wedding_dress", "sub": "groom", "item": "groom_prince_coat", "limit": 12},
 
     # ── 2. Furniture ────────────────────────────────────────────────────
     {"kind": "shopify", "url": "https://furniturecity.com.pk/collections/sofas/products.json",
@@ -310,15 +332,27 @@ def strip_html(text: str) -> str:
 
 
 def fetch(url: str, **kwargs) -> requests.Response | None:
-    try:
-        resp = SESSION.get(url, timeout=TIMEOUT, **kwargs)
-        if resp.status_code >= 400:
-            log(f"  ! {resp.status_code} {url}")
+    retries = 3
+    for attempt in range(retries):
+        try:
+            resp = SESSION.get(url, timeout=TIMEOUT, **kwargs)
+            if resp.status_code == 429:
+                wait = 8 * (attempt + 1)
+                log(f"  ! 429 rate-limit — waiting {wait}s ({attempt + 1}/{retries})")
+                time.sleep(wait)
+                continue
+            if resp.status_code >= 400:
+                log(f"  ! {resp.status_code} {url}")
+                return None
+            time.sleep(0.8)  # be polite between successful fetches
+            return resp
+        except requests.RequestException as exc:
+            log(f"  ! {exc} {url}")
+            if attempt + 1 < retries:
+                time.sleep(2)
+                continue
             return None
-        return resp
-    except requests.RequestException as exc:
-        log(f"  ! {exc} {url}")
-        return None
+    return None
 
 
 def gbp_to_pkr_rate() -> float:
@@ -384,35 +418,48 @@ def shopify_image(product: dict) -> str:
 
 
 def parse_shopify(src: dict, gbp_rate: float) -> list[dict]:
-    url = src["url"]
-    if "limit=" not in url:
-        url += ("&" if "?" in url else "?") + "limit=50"
-    resp = fetch(url)
-    if not resp:
-        return []
-    try:
-        products = resp.json().get("products") or []
-    except ValueError:
-        return []
+    """Fetch Shopify collection products with pagination until limit is met."""
+    limit = src.get("limit", DEFAULT_LIMIT)
+    base = src["url"]
+    # Strip existing query; we'll paginate ourselves
+    parsed_url = urlparse(base)
+    clean_base = f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}"
     out = []
-    for p in products:
-        variants = p.get("variants") or [{}]
-        price = convert_price(variants[0].get("price"), src.get("currency", "PKR"), gbp_rate)
-        if not price:
-            continue
-        handle = p.get("handle") or ""
-        parsed = urlparse(src["url"])
-        product_url = f"{parsed.scheme}://{parsed.netloc}/products/{handle}" if handle else src["url"]
-        out.append({
-            "title": strip_html(p.get("title") or ""),
-            "description": strip_html(p.get("body_html") or p.get("title") or ""),
-            "price": price,
-            "image": shopify_image(p),
-            "source_url": product_url,
-            "brand": (p.get("vendor") or "").strip(),
-            "color": (variants[0].get("option1") or ""),
-        })
-    return out[: src.get("limit", DEFAULT_LIMIT)]
+    page = 1
+    while len(out) < limit and page <= 8:
+        url = f"{clean_base}?limit=50&page={page}"
+        resp = fetch(url)
+        if not resp:
+            break
+        try:
+            products = resp.json().get("products") or []
+        except ValueError:
+            break
+        if not products:
+            break
+        for p in products:
+            variants = p.get("variants") or [{}]
+            price = convert_price(variants[0].get("price"), src.get("currency", "PKR"), gbp_rate)
+            if not price:
+                continue
+            handle = p.get("handle") or ""
+            product_url = (
+                f"{parsed_url.scheme}://{parsed_url.netloc}/products/{handle}"
+                if handle else src["url"]
+            )
+            out.append({
+                "title": strip_html(p.get("title") or ""),
+                "description": strip_html(p.get("body_html") or p.get("title") or ""),
+                "price": price,
+                "image": shopify_image(p),
+                "source_url": product_url,
+                "brand": (p.get("vendor") or "").strip(),
+                "color": (variants[0].get("option1") or ""),
+            })
+            if len(out) >= limit:
+                break
+        page += 1
+    return out[:limit]
 
 
 def wc_category_id(base: str, slug: str) -> int | None:
@@ -777,7 +824,7 @@ def already_exists(db, title: str, source_url: str) -> bool:
     return db[PRODUCTS_COLLECTION].find_one(q, {"_id": 1}) is not None
 
 
-def scrape_all() -> None:
+def scrape_all(wedding_only: bool = False) -> None:
     client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=10000)
     db = client[MONGO_DB]
     seller = ensure_catalog_seller(db)
@@ -794,8 +841,11 @@ def scrape_all() -> None:
     skipped = 0
     by_cat: dict[str, int] = {}
     by_sub: dict[str, int] = {}
+    sources = [s for s in SOURCES if (not wedding_only or s.get("major") == "wedding_dress")]
+    if wedding_only:
+        log(f"Wedding-dress mode: {len(sources)} sources")
 
-    for src in SOURCES:
+    for src in sources:
         label = src.get("url") or f"{src.get('base')} {src.get('category_slug') or src.get('search')}"
         log(f"\n-> {src['kind']}  {label}")
         parser = PARSERS.get(src["kind"])
@@ -829,32 +879,33 @@ def scrape_all() -> None:
             by_sub[key] = by_sub.get(key, 0) + 1
 
     # Fill thin decoration / kitchen slices from fallback so each main category has enough rows
-    counts = {
-        r["_id"]: r["n"]
-        for r in db[PRODUCTS_COLLECTION].aggregate([
-            {"$match": {"availability_status": "available"}},
-            {"$group": {"_id": "$major_category", "n": {"$sum": 1}}},
-        ])
-    }
-    for fb in FALLBACK_PRODUCTS:
-        cat_n = counts.get(fb["major"], 0)
-        sub_n = db[PRODUCTS_COLLECTION].count_documents({
-            "major_category": fb["major"], "subcategory": fb["sub"], "availability_status": "available",
-        })
-        need_cat = cat_n < 23
-        need_sub = sub_n < 4
-        if not (need_cat or need_sub):
-            continue
-        if already_exists(db, fb["title"], fb.get("source") or ""):
-            skipped += 1
-            continue
-        src = {"major": fb["major"], "sub": fb["sub"], "item": fb["item"], "url": fb.get("source")}
-        row = {"title": fb["title"], "description": fb["description"], "price": fb["price"],
-               "image": fb["image"], "source_url": fb.get("source")}
-        db[PRODUCTS_COLLECTION].insert_one(to_product_doc(row, src, seller))
-        inserted += 1
-        counts[fb["major"]] = counts.get(fb["major"], 0) + 1
-        by_cat[fb["major"]] = by_cat.get(fb["major"], 0) + 1
+    if not wedding_only:
+        counts = {
+            r["_id"]: r["n"]
+            for r in db[PRODUCTS_COLLECTION].aggregate([
+                {"$match": {"availability_status": "available"}},
+                {"$group": {"_id": "$major_category", "n": {"$sum": 1}}},
+            ])
+        }
+        for fb in FALLBACK_PRODUCTS:
+            cat_n = counts.get(fb["major"], 0)
+            sub_n = db[PRODUCTS_COLLECTION].count_documents({
+                "major_category": fb["major"], "subcategory": fb["sub"], "availability_status": "available",
+            })
+            need_cat = cat_n < 23
+            need_sub = sub_n < 4
+            if not (need_cat or need_sub):
+                continue
+            if already_exists(db, fb["title"], fb.get("source") or ""):
+                skipped += 1
+                continue
+            src = {"major": fb["major"], "sub": fb["sub"], "item": fb["item"], "url": fb.get("source")}
+            row = {"title": fb["title"], "description": fb["description"], "price": fb["price"],
+                   "image": fb["image"], "source_url": fb.get("source")}
+            db[PRODUCTS_COLLECTION].insert_one(to_product_doc(row, src, seller))
+            inserted += 1
+            counts[fb["major"]] = counts.get(fb["major"], 0) + 1
+            by_cat[fb["major"]] = by_cat.get(fb["major"], 0) + 1
 
     log("\nRebuilding market price stats…")
     stats = rebuild_price_stats(db)
@@ -864,12 +915,22 @@ def scrape_all() -> None:
         log("Visual search cache invalidated.")
     except Exception:
         pass
+
+    # Dress counts in DB after run
+    dress_counts = list(db[PRODUCTS_COLLECTION].aggregate([
+        {"$match": {"major_category": "wedding_dress", "availability_status": "available"}},
+        {"$group": {"_id": "$item_type", "n": {"$sum": 1}}},
+        {"$sort": {"n": -1}},
+    ]))
     client.close()
 
     log(f"\nInserted {inserted} new products, skipped {skipped} duplicates")
     log("By major category (this run):")
     for k, v in sorted(by_cat.items()):
         log(f"  {k}: +{v}")
+    log("Wedding dress totals in DB:")
+    for row in dress_counts:
+        log(f"  {row['_id']}: {row['n']}")
     log("Stored averages:")
     for cat, info in (stats.get("categories") or {}).items():
         rng = (info.get("priority_ranges") or {}).get("Medium") or {}
@@ -878,4 +939,5 @@ def scrape_all() -> None:
 
 
 if __name__ == "__main__":
-    scrape_all()
+    wedding_only = "--wedding-only" in sys.argv or "--dresses" in sys.argv
+    scrape_all(wedding_only=wedding_only)

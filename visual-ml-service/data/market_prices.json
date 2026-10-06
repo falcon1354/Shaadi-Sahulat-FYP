@@ -1,69 +1,69 @@
 {
-  "updated_at": "2026-09-08T08:58:00.487691+00:00",
+  "updated_at": "2026-10-05T18:07:38.004435+00:00",
   "categories": {
     "wedding_dress": {
-      "avg": 86277,
-      "median": 49686,
-      "min": 12500,
-      "max": 395000,
-      "count": 46,
-      "avg_top5_cheapest": 17100,
+      "avg": 99687,
+      "median": 36500,
+      "min": 5000,
+      "max": 495000,
+      "count": 123,
+      "avg_top5_cheapest": 11000,
       "priority_ranges": {
         "High": {
-          "min": 94905,
-          "max": 125102
+          "min": 109656,
+          "max": 144546
         },
         "Medium": {
-          "min": 70747,
-          "max": 101807
+          "min": 81743,
+          "max": 117631
         },
         "Low": {
-          "min": 56080,
-          "max": 77649
+          "min": 64797,
+          "max": 89718
         }
       },
       "subcategories": {
         "bridal": {
-          "avg": 44782,
-          "median": 46664,
-          "min": 23500,
+          "avg": 35111,
+          "median": 28500,
+          "min": 5000,
           "max": 73368,
-          "count": 31,
-          "avg_top5_cheapest": 25100,
+          "count": 72,
+          "avg_top5_cheapest": 17400,
           "priority_ranges": {
             "High": {
-              "min": 49260,
-              "max": 64934
+              "min": 38622,
+              "max": 50911
             },
             "Medium": {
-              "min": 36721,
-              "max": 52843
+              "min": 28791,
+              "max": 41431
             },
             "Low": {
-              "min": 29108,
-              "max": 40304
+              "min": 22822,
+              "max": 31600
             }
           },
           "item_types": {
             "bridal_lehenga": {
-              "avg": 55998,
-              "median": 57541,
-              "min": 46664,
+              "avg": 34637,
+              "median": 28500,
+              "min": 19500,
               "max": 66870,
-              "count": 6,
-              "avg_top5_cheapest": 53823,
+              "count": 29,
+              "avg_top5_cheapest": 21900,
               "priority_ranges": {
                 "High": {
-                  "min": 61598,
-                  "max": 81197
+                  "min": 38101,
+                  "max": 50224
                 },
                 "Medium": {
-                  "min": 45918,
-                  "max": 66078
+                  "min": 28402,
+                  "max": 40872
                 },
                 "Low": {
-                  "min": 36399,
-                  "max": 50398
+                  "min": 22514,
+                  "max": 31173
                 }
               }
             },
@@ -90,136 +90,136 @@
               }
             },
             "bridal_saree": {
-              "avg": 49862,
-              "median": 51053,
-              "min": 26926,
+              "avg": 44254,
+              "median": 50623,
+              "min": 5000,
               "max": 61585,
-              "count": 7,
-              "avg_top5_cheapest": 45225,
+              "count": 8,
+              "avg_top5_cheapest": 34287,
               "priority_ranges": {
                 "High": {
-                  "min": 54848,
-                  "max": 72300
+                  "min": 48679,
+                  "max": 64168
                 },
                 "Medium": {
-                  "min": 40887,
-                  "max": 58837
+                  "min": 36288,
+                  "max": 52220
                 },
                 "Low": {
-                  "min": 32410,
-                  "max": 44876
+                  "min": 28765,
+                  "max": 39829
                 }
               }
             },
             "bridal_maxi": {
-              "avg": 28667,
-              "median": 28000,
-              "min": 23500,
-              "max": 36500,
-              "count": 6,
-              "avg_top5_cheapest": 27100,
+              "avg": 27750,
+              "median": 26500,
+              "min": 19500,
+              "max": 42500,
+              "count": 23,
+              "avg_top5_cheapest": 22100,
               "priority_ranges": {
                 "High": {
-                  "min": 31534,
-                  "max": 41567
+                  "min": 30525,
+                  "max": 40238
                 },
                 "Medium": {
-                  "min": 23507,
-                  "max": 33827
+                  "min": 22755,
+                  "max": 32745
                 },
                 "Low": {
-                  "min": 18634,
-                  "max": 25800
+                  "min": 18038,
+                  "max": 24975
                 }
               }
             }
           }
         },
         "groom": {
-          "avg": 172033,
+          "avg": 190853,
           "median": 225000,
           "min": 12500,
-          "max": 395000,
-          "count": 15,
-          "avg_top5_cheapest": 18100,
+          "max": 495000,
+          "count": 51,
+          "avg_top5_cheapest": 12900,
           "priority_ranges": {
             "High": {
-              "min": 189236,
-              "max": 249448
+              "min": 209938,
+              "max": 276737
             },
             "Medium": {
-              "min": 141067,
-              "max": 202999
+              "min": 156499,
+              "max": 225207
             },
             "Low": {
-              "min": 111821,
-              "max": 154830
+              "min": 124054,
+              "max": 171768
             }
           },
           "item_types": {
             "groom_sherwani": {
-              "avg": 293000,
-              "median": 225000,
+              "avg": 309500,
+              "median": 295000,
               "min": 225000,
-              "max": 395000,
-              "count": 5,
-              "avg_top5_cheapest": 293000,
+              "max": 495000,
+              "count": 20,
+              "avg_top5_cheapest": 225000,
               "priority_ranges": {
                 "High": {
-                  "min": 322300,
-                  "max": 424850
+                  "min": 340450,
+                  "max": 448775
                 },
                 "Medium": {
-                  "min": 240260,
-                  "max": 345740
+                  "min": 253790,
+                  "max": 365210
                 },
                 "Low": {
-                  "min": 190450,
-                  "max": 263700
+                  "min": 201175,
+                  "max": 278550
                 }
               }
             },
             "groom_shalwar_kameez": {
-              "avg": 18100,
-              "median": 18500,
+              "avg": 16038,
+              "median": 14500,
               "min": 12500,
               "max": 28500,
-              "count": 5,
-              "avg_top5_cheapest": 18100,
+              "count": 13,
+              "avg_top5_cheapest": 12900,
               "priority_ranges": {
                 "High": {
-                  "min": 19910,
-                  "max": 26245
+                  "min": 17642,
+                  "max": 23255
                 },
                 "Medium": {
-                  "min": 14842,
-                  "max": 21358
+                  "min": 13151,
+                  "max": 18925
                 },
                 "Low": {
-                  "min": 11765,
-                  "max": 16290
+                  "min": 10425,
+                  "max": 14434
                 }
               }
             },
             "groom_prince_coat": {
-              "avg": 205000,
-              "median": 225000,
-              "min": 175000,
+              "avg": 185278,
+              "median": 175000,
+              "min": 125000,
               "max": 225000,
-              "count": 5,
-              "avg_top5_cheapest": 205000,
+              "count": 18,
+              "avg_top5_cheapest": 141000,
               "priority_ranges": {
                 "High": {
-                  "min": 225500,
-                  "max": 297250
+                  "min": 203806,
+                  "max": 268653
                 },
                 "Medium": {
-                  "min": 168100,
-                  "max": 241900
+                  "min": 151928,
+                  "max": 218628
                 },
                 "Low": {
-                  "min": 133250,
-                  "max": 184500
+                  "min": 120431,
+                  "max": 166750
                 }
               }
             }

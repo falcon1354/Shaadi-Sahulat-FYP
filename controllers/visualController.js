@@ -59,7 +59,10 @@ exports.recommend = async (req, res) => {
       Math.round(req.file.size / 1024)
     );
 
-    return res.status(400).json(mlResult);
+    const isServiceDown =
+      mlResult?.stage === "service" ||
+      /not running|unavailable|PyTorch|torch/i.test(String(mlResult?.reason || ""));
+    return res.status(isServiceDown ? 503 : 400).json(mlResult);
   } catch (error) {
     console.error("[VisualController] Recommend error:", error.message);
     return res.status(500).json({

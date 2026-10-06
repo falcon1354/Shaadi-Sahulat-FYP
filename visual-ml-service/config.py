@@ -235,7 +235,7 @@ MAX_RESULTS_DEFAULT = 3     # Return up to 3 recommendations via cascade
 MAX_RESULTS_LIMIT   = 20
 
 # ── Validation Thresholds ──────────────────────────────────────────────────
-CATEGORY_CONFIDENCE_THRESHOLD = 0.50
+CATEGORY_CONFIDENCE_THRESHOLD = 0.28  # 3-class softmax; ImageNet-only head rarely exceeds ~40%
 SAFETY_SIMILARITY_THRESHOLD   = 0.70
 MAX_UPLOAD_SIZE_MB            = 5
 

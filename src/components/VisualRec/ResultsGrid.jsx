@@ -8,27 +8,27 @@ function SimilarityTooltip({ item }) {
   const text  = Math.round((item.text_similarity     || 0) * 100);
 
   return (
-    <div className="absolute bottom-full right-0 mb-2 z-20 w-48 bg-white rounded-xl shadow-xl border border-gray-200 p-3 text-xs pointer-events-none">
-      <p className="font-semibold text-gray-700 mb-2">Similarity Breakdown</p>
+    <div className="absolute bottom-full right-0 mb-2 z-20 w-52 bg-white rounded-2xl shadow-xl border border-[#EFEAE4] p-3.5 text-xs pointer-events-none space-y-2">
+      <p className="font-bold text-stone-800 text-[11px] uppercase tracking-wider">Similarity Match</p>
       {[
-        { label: 'Image',  pct: img,   color: 'bg-primary-500' },
-        { label: 'Colour', pct: color, color: 'bg-teal-500' },
-        { label: 'Text',   pct: text,  color: 'bg-orange-400' },
+        { label: 'Silhouette', pct: img,   color: 'bg-[#9B7036]' },
+        { label: 'Color Shade', pct: color, color: 'bg-emerald-700' },
+        { label: 'Fabric/Text', pct: text,  color: 'bg-amber-600' },
       ].map(({ label, pct, color: cls }) => (
-        <div key={label} className="flex items-center gap-2 mb-1.5">
-          <span className="w-12 text-gray-500 shrink-0">{label}</span>
-          <div className="flex-1 bg-gray-100 rounded-full h-1.5">
+        <div key={label} className="flex items-center gap-2 text-[11px]">
+          <span className="w-16 text-stone-500 shrink-0 font-medium">{label}</span>
+          <div className="flex-1 bg-stone-100 rounded-full h-1.5 overflow-hidden">
             <div className={`${cls} h-1.5 rounded-full`} style={{ width: `${pct}%` }} />
           </div>
-          <span className="w-8 text-right text-gray-600 font-medium">{pct}%</span>
+          <span className="w-8 text-right text-stone-800 font-bold">{pct}%</span>
         </div>
       ))}
       {item.color_name && (
-        <p className="mt-2 pt-2 border-t border-gray-100 text-gray-500">
-          Colour: <strong className="text-gray-700">{item.color_name}</strong>
+        <p className="pt-2 border-t border-stone-100 text-[11px] text-stone-500">
+          Identified Hue: <strong className="text-stone-800 capitalize">{item.color_name}</strong>
           {item.color_hex && (
             <span
-              className="ml-1.5 inline-block w-3 h-3 rounded-full border border-gray-300 align-middle"
+              className="ml-1.5 inline-block w-3 h-3 rounded-full border border-stone-300 align-middle"
               style={{ backgroundColor: item.color_hex }}
             />
           )}
@@ -49,41 +49,41 @@ function ResultCard({ item }) {
   const matchPct    = item.match_percentage ?? Math.round((item.hybrid_score || 0) * 100);
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:border-primary-400 transition-all overflow-hidden flex flex-col">
+    <div className="bg-white rounded-2xl border border-[#EFEAE4] shadow-xs hover:shadow-lg hover:border-[#ECD4A8] transition-all overflow-hidden flex flex-col group">
       {/* Image */}
-      <div className="relative aspect-square bg-gray-50 overflow-hidden">
+      <div className="relative aspect-[4/5] bg-[#FAF7F2] overflow-hidden">
         {imageUrl ? (
           <img
             src={imageUrl}
             alt={item.title}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             onError={e => { e.target.style.display = 'none'; }}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300 text-4xl">👗</div>
+          <div className="w-full h-full flex items-center justify-center text-stone-400 text-xs">No image preview</div>
         )}
 
         {/* Match % badge — top-left */}
-        <span className="absolute top-2 left-2 bg-primary-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-          {matchPct}% match
+        <span className="absolute top-2.5 left-2.5 bg-stone-900/90 text-[#ECD4A8] text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-[#ECD4A8]/30 backdrop-blur-xs shadow-xs">
+          {matchPct}% Match
         </span>
 
         {/* Sale badge */}
         {hasDiscount && (
-          <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+          <span className="absolute top-2.5 right-2.5 bg-[#800020] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-xs">
             SALE
           </span>
         )}
 
         {/* Similarity breakdown icon — bottom-right, hover shows tooltip */}
         <div
-          className="absolute bottom-2 right-2"
+          className="absolute bottom-2.5 right-2.5"
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         >
           <button
-            className="w-6 h-6 rounded-full bg-white/80 border border-gray-200 flex items-center justify-center text-[10px] text-gray-500 hover:bg-white hover:border-primary-400 transition-all shadow-sm"
-            title="Similarity breakdown"
+            className="w-7 h-7 rounded-full bg-white/90 border border-stone-200 flex items-center justify-center text-[10px] text-stone-700 hover:bg-white hover:border-[#9B7036] transition-all shadow-xs cursor-pointer"
+            title="Similarity match breakdown"
           >
             ℹ
           </button>
@@ -92,34 +92,34 @@ function ResultCard({ item }) {
       </div>
 
       {/* Info */}
-      <div className="p-3 flex flex-col flex-1">
-        <p className="text-xs text-primary-900 font-medium mb-0.5 capitalize">
+      <div className="p-3.5 flex flex-col flex-1 bg-white">
+        <p className="text-[10px] text-[#9B7036] font-bold uppercase tracking-wider mb-1 capitalize">
           {item.category?.replace(/_/g, ' ')}
         </p>
-        <p className="text-sm font-semibold text-gray-800 line-clamp-2 flex-1">
+        <p className="text-xs font-bold text-stone-900 line-clamp-2 flex-1 mb-2 leading-snug">
           {item.title || item.product_id}
         </p>
 
-        <div className="mt-2 flex items-center gap-2">
+        <div className="flex items-baseline gap-2 mb-2">
           {hasDiscount ? (
             <>
-              <span className="text-sm font-bold text-green-600">
+              <span className="text-sm font-bold font-serif text-emerald-800">
                 PKR {Number(item.discount_price).toLocaleString()}
               </span>
-              <span className="text-xs text-gray-400 line-through">
+              <span className="text-[11px] text-stone-400 line-through">
                 PKR {Number(item.price).toLocaleString()}
               </span>
             </>
           ) : item.price ? (
-            <span className="text-sm font-bold text-primary-950">
+            <span className="text-sm font-bold font-serif text-stone-900">
               PKR {Number(item.price).toLocaleString()}
             </span>
           ) : null}
         </div>
 
-        <div className="mt-1.5 flex items-center justify-between text-[10px] text-gray-400">
-          <span>{item.seller_name || 'Seller'}</span>
-          {item.city && <span>📍 {item.city}</span>}
+        <div className="flex items-center justify-between text-[10px] text-stone-400 pt-2 border-t border-stone-100">
+          <span className="font-medium text-stone-600 truncate">{item.seller_name || 'Boutique Collection'}</span>
+          {item.city && <span>{item.city}</span>}
         </div>
       </div>
     </div>
@@ -131,51 +131,30 @@ export default function ResultsGrid({ result }) {
 
   if (!results || results.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-primary-200 p-8 text-center">
-        <span className="text-4xl">🔍</span>
-        <p className="text-gray-600 mt-2">No similar dresses found.</p>
-        <p className="text-xs text-gray-400 mt-1">
-          Run <code className="bg-gray-100 px-1 rounded">python seed_all_categories.py</code> first.
+      <div className="bg-white rounded-2xl shadow-xs border border-[#EFEAE4] p-10 text-center space-y-2">
+        <p className="text-sm font-bold text-stone-800">No close matches found in current catalog</p>
+        <p className="text-xs text-stone-500 max-w-sm mx-auto leading-relaxed font-sans">
+          Try describing the dress using alternate fabric or color keywords, or upload another angle.
         </p>
       </div>
     );
   }
 
-  const categoryLabel = validation?.predicted_category?.replace(/_/g, ' ') || 'dress';
-  const queryColor    = result.query_analysis?.color || '';
-  const embDim        = search_metadata?.embedding_dim || 1280;
-
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-primary-200 p-5">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <h3 className="font-bold text-gray-800">
-            ✨ {results.length} similar {categoryLabel}s found
-          </h3>
-          <p className="text-xs text-gray-400 mt-0.5">
-            {search_metadata?.search_time_ms || 0}ms &nbsp;·&nbsp;
-            {embDim}-dim EfficientNet-B0
-            {queryColor && <span> &nbsp;·&nbsp; Query colour: <strong>{queryColor}</strong></span>}
-          </p>
-        </div>
-        {validation?.used_preferred_category && (
-          <span className="text-xs text-primary-900 bg-primary-50 px-2 py-0.5 rounded-full">
-            🏷️ Hint used
-          </span>
-        )}
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-bold font-serif text-stone-900">
+          Top Matching Bridalwear ({results.length} results)
+        </h3>
+        <span className="text-xs text-[#9B7036] font-bold">Ranked by Visual Similarity</span>
       </div>
 
-      {/* Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {results.map(item => (
-          <ResultCard key={item.product_id} item={item} />
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {results.map((item, idx) => (
+          <ResultCard key={item.product_id || idx} item={item} />
         ))}
       </div>
-
-      <p className="text-xs text-gray-400 text-center mt-4">
-        Hover the ℹ icon on any card to see image · colour · text similarity scores
-      </p>
     </div>
   );
 }
+

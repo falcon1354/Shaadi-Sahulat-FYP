@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Heart, MapPin, ShoppingBag, Package } from 'lucide-react';
+import { Heart, MapPin, ShoppingBag, Package, Sparkles } from 'lucide-react';
 import sellerApi from '../../api/sellerApi';
 import { useCart } from '../../context/CartContext';
 import { useCategories } from '../../hooks/useCategories';
 import { toggleWishlistItem, recordRecentlyViewed, patchDowryBudgets } from '../../api/buyerApi';
 import ThriftHomePage from '../Thrift/ThriftHomePage';
-import heroRetailImg from '../../assets/hero/Hero_Retail.jpeg';
+import heroRetailImg from '../../assets/hero/Buyer_Marketplace.jpg';
 import heroThriftImg from '../../assets/hero/Hero_Thrift.jpeg';
 
 const SORT_OPTIONS = [
@@ -315,20 +315,20 @@ function ProductCard({ product, onView, highlight, onAddToCart, isWishlisted, on
 
           {/* Discount badge — top-left */}
           {hasDiscount && (
-            <span className="absolute top-2.5 left-2.5 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+            <span className="absolute top-2.5 left-2.5 bg-[#800020] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-xs">
               {product.discount_pct ? `${Math.round(product.discount_pct)}% OFF` : 'SALE'}
             </span>
           )}
 
-          {/* Hot-deal / Best-seller badges — stacked under discount, top-left */}
+          {/* Hot-deal / Best-seller badges */}
           {product.is_hot_deal && (hasDiscount || product.discount_pct) && (
-            <span className="absolute top-9 left-2.5 animate-pulse bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-              🔥 HOT DEAL
+            <span className="absolute top-9 left-2.5 bg-[#9B7036] text-white text-[9.5px] font-bold px-2.5 py-0.5 rounded-full shadow-xs">
+              FEATURED DEAL
             </span>
           )}
           {product.is_best_seller && (
-            <span className="absolute top-[60px] left-2.5 animate-pulse bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm">
-              ⭐ BEST SELLER
+            <span className="absolute top-[60px] left-2.5 bg-stone-900 text-[#ECD4A8] text-[9.5px] font-extrabold px-2.5 py-0.5 rounded-full shadow-xs border border-[#ECD4A8]/30">
+              POPULAR CHOICE
             </span>
           )}
 
@@ -336,8 +336,8 @@ function ProductCard({ product, onView, highlight, onAddToCart, isWishlisted, on
           {!isAdminView && (
             <button
               onClick={e => { e.stopPropagation(); onToggleWishlist(product); }}
-              className={`absolute top-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all cursor-pointer ${
-                isWishlisted ? 'bg-rose-500 text-white' : 'bg-white/90 text-gray-400 hover:text-rose-500 hover:scale-110'
+              className={`absolute top-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center shadow-xs transition-all cursor-pointer ${
+                isWishlisted ? 'bg-[#800020] text-white' : 'bg-white/90 text-stone-400 hover:text-[#800020] hover:scale-110'
               }`}
               title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}>
               <Heart size={14} className={isWishlisted ? 'fill-white' : ''} />
@@ -346,60 +346,60 @@ function ProductCard({ product, onView, highlight, onAddToCart, isWishlisted, on
 
           {/* +N more images indicator — bottom-left */}
           {product.images?.length > 1 && (
-            <span className="absolute bottom-2.5 left-2.5 bg-white/90 text-gray-700 text-[9.5px] font-extrabold px-2 py-0.5 rounded-full border border-white/40 shadow-sm">
-              🖼️ +{product.images.length - 1}
+            <span className="absolute bottom-2.5 left-2.5 bg-white/95 text-stone-700 text-[9.5px] font-bold px-2 py-0.5 rounded-full border border-stone-200/60 shadow-xs">
+              +{product.images.length - 1} photos
             </span>
           )}
 
           {/* Condition pill — bottom-right */}
           {product.condition && product.condition !== 'New' && (
-            <span className="absolute bottom-2.5 right-2.5 bg-amber-100/95 text-amber-700 text-[10px] font-medium px-2 py-0.5 rounded-full border border-amber-200/50">
+            <span className="absolute bottom-2.5 right-2.5 bg-[#FAF7F2] text-[#9B7036] text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-[#EADBCC]">
               {product.condition}
             </span>
           )}
         </div>
 
         {/* Info */}
-        <div className="p-3 flex flex-col flex-1">
+        <div className="p-3.5 flex flex-col flex-1 bg-white">
           {/* Category breadcrumb */}
-          <p className="text-[10px] text-[#a37b3d] font-bold uppercase tracking-wide mb-1 capitalize">
+          <p className="text-[10px] text-[#9B7036] font-bold uppercase tracking-wider mb-1 capitalize">
             {product.major_category?.replace(/_/g, ' ')}
             {product.subcategory ? ` › ${product.subcategory.replace(/_/g, ' ')}` : ''}
           </p>
           {/* Title */}
-          <p className="text-sm font-semibold text-gray-800 line-clamp-2 flex-1 mb-2 leading-snug">{product.title}</p>
+          <p className="text-xs md:text-sm font-semibold text-stone-900 line-clamp-2 flex-1 mb-2 leading-snug">{product.title}</p>
 
           {/* Price hierarchy */}
-          <div className="flex items-baseline gap-2 mb-1.5">
+          <div className="flex items-baseline gap-2 mb-2">
             {hasDiscount ? (
               <>
-                <span className="text-base font-bold text-green-600">PKR {product.discount_price.toLocaleString()}</span>
-                <span className="text-xs text-gray-400 line-through">PKR {product.price.toLocaleString()}</span>
+                <span className="text-sm md:text-base font-bold font-serif text-emerald-800">PKR {product.discount_price.toLocaleString()}</span>
+                <span className="text-[11px] text-stone-400 line-through">PKR {product.price.toLocaleString()}</span>
               </>
             ) : (
-              <span className="text-base font-bold text-[#a37b3d]">PKR {product.price?.toLocaleString()}</span>
+              <span className="text-sm md:text-base font-bold font-serif text-stone-900">PKR {product.price?.toLocaleString()}</span>
             )}
           </div>
 
           {/* Seller · City · Sold — single muted row */}
-          <div className="text-[10px] text-gray-400 flex items-center gap-1.5 flex-wrap mb-2.5 min-h-[14px]">
-            {product.seller_name && <span className="truncate max-w-[90px]">{product.seller_name}</span>}
-            {product.seller_name && product.city && <span className="text-gray-300">·</span>}
+          <div className="text-[10px] text-stone-400 flex items-center gap-1.5 flex-wrap mb-3 min-h-[14px]">
+            {product.seller_name && <span className="truncate max-w-[90px] font-medium text-stone-600">{product.seller_name}</span>}
+            {product.seller_name && product.city && <span className="text-stone-300">·</span>}
             {product.city && (
               <span className="flex items-center gap-0.5"><MapPin size={9} /> {product.city}</span>
             )}
             {totalSold > 0 && (
-              <span className="ml-auto text-green-600 font-semibold">Sold: {totalSold}</span>
+              <span className="ml-auto text-emerald-700 font-semibold">{totalSold} ordered</span>
             )}
           </div>
 
-          {/* Add to Cart (does NOT open PDP — stopPropagation) */}
+          {/* Add to Cart */}
           {!isAdminView && (
             <button
               onClick={handleAddToCart}
-              className="w-full py-2 text-xs font-bold text-gray-900 bg-[#ECD4A8] rounded-xl hover:bg-[#dfc08d] transition-all cursor-pointer shadow-sm flex items-center justify-center gap-1.5"
+              className="w-full py-2 text-xs font-bold text-stone-900 bg-[#FAF7F2] border border-[#EADBCC] rounded-xl hover:bg-[#9B7036] hover:text-white hover:border-[#9B7036] transition-all cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
             >
-              <ShoppingBag size={12} /> Add to Cart
+              <ShoppingBag size={13} /> Add to Cart
             </button>
           )}
         </div>
@@ -442,7 +442,7 @@ function ProductDetailModal({ product, onClose, onAddToCart, isWishlisted, onTog
               <button
                 onClick={() => onToggleWishlist(product)}
                 className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all cursor-pointer ${
-                  isWishlisted ? 'bg-[#FFF5F8]0 text-white' : 'bg-white/90 text-gray-400 hover:text-[#a37b3d]'
+                  isWishlisted ? 'bg-[#800020] text-white' : 'bg-white/90 text-gray-400 hover:text-[#9B7036]'
                 }`}>
                 <Heart size={18} className={isWishlisted ? 'fill-white' : ''} />
               </button>
@@ -452,24 +452,24 @@ function ProductDetailModal({ product, onClose, onAddToCart, isWishlisted, onTog
         <div className="p-5">
           <div className="flex items-start justify-between mb-3">
             <div>
-              <p className="text-xs text-[#a37b3d] font-bold capitalize mb-1">
+              <p className="text-xs text-[#9B7036] font-bold capitalize mb-1">
                 {product.major_category?.replace(/_/g, ' ')}
               </p>
               <h2 className="text-lg font-bold text-gray-800">{product.title}</h2>
             </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none p-1">×</button>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none p-1 cursor-pointer">×</button>
           </div>
 
           {/* Budget banner inside modal */}
           {budgetInfo && (
-            <div className="mb-3 p-3 bg-[#FFF5F8] rounded-xl border border-[#FBEFF1] text-xs">
-              <p className="font-bold text-[#a37b3d] capitalize mb-1">
+            <div className="mb-3 p-3 bg-[#FAF7F2] rounded-xl border border-[#EADBCC] text-xs">
+              <p className="font-bold text-[#9B7036] capitalize mb-1">
                 Your {product.major_category?.replace(/_/g, ' ')} Budget
               </p>
               <div className="flex gap-3 text-gray-600 font-medium">
                 <span>Budget: <strong>PKR {budgetInfo.estimated?.toLocaleString()}</strong></span>
                 <span>Spent: <strong>PKR {(budgetInfo.spent || 0).toLocaleString()}</strong></span>
-                <span className={budgetInfo.remaining < 0 ? 'text-red-500' : 'text-green-600'}>
+                <span className={budgetInfo.remaining < 0 ? 'text-red-500' : 'text-emerald-700'}>
                   Left: <strong>PKR {(budgetInfo.remaining ?? budgetInfo.estimated ?? 0).toLocaleString()}</strong>
                 </span>
               </div>
@@ -479,14 +479,14 @@ function ProductDetailModal({ product, onClose, onAddToCart, isWishlisted, onTog
           <div className="flex items-center gap-3 mb-3">
             {hasDiscount ? (
               <>
-                <span className="text-xl font-bold text-green-600">PKR {product.discount_price.toLocaleString()}</span>
-                <span className="text-sm text-gray-400 line-through">PKR {product.price.toLocaleString()}</span>
-                <span className="text-xs bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded-full">
+                <span className="text-xl font-bold text-emerald-800 font-serif">PKR {product.discount_price.toLocaleString()}</span>
+                <span className="text-sm text-gray-400 line-through font-serif">PKR {product.price.toLocaleString()}</span>
+                <span className="text-xs bg-red-100 text-[#800020] font-bold px-2 py-0.5 rounded-full">
                   {Math.round(product.discount_pct || 0)}% OFF
                 </span>
               </>
             ) : (
-              <span className="text-xl font-bold text-[#a37b3d]">PKR {product.price?.toLocaleString()}</span>
+              <span className="text-xl font-bold text-stone-900 font-serif">PKR {product.price?.toLocaleString()}</span>
             )}
           </div>
 
@@ -508,14 +508,14 @@ function ProductDetailModal({ product, onClose, onAddToCart, isWishlisted, onTog
           <div className="flex items-center justify-between pt-3 border-t border-gray-100 mb-4 text-sm text-gray-500">
             <span>Sold by <strong className="text-gray-700">{product.seller_name}</strong></span>
             {product.stock_quantity > 0 && (
-              <span className="text-green-600 text-xs font-medium">{product.stock_quantity} in stock</span>
+              <span className="text-emerald-700 text-xs font-medium">{product.stock_quantity} in stock</span>
             )}
           </div>
 
           {!isAdminView && (
             <button
               onClick={() => onAddToCart(product, () => { setToast(true); setTimeout(() => setToast(false), 1800); })}
-              className="w-full py-2.5 bg-[#ECD4A8] hover:bg-[#dfc08d] text-gray-955 rounded-xl text-sm font-bold transition-all shadow-md shadow-[#ECD4A8]/10 cursor-pointer">
+              className="w-full py-2.5 bg-[#9B7036] hover:bg-[#7E5724] text-white rounded-xl text-sm font-bold transition-all shadow-xs cursor-pointer">
               Add to Cart
             </button>
           )}
@@ -790,61 +790,61 @@ export default function MarketplacePage({
   const goCategoryOnly = () => { setActiveSub(''); setPage(1); };
 
   return (
-    <div className="animate-fade-in">
-      {/* Unified Dynamic Hero Banner - Switches Image & Text dynamically for Retail vs Thrift */}
-      <div className={`text-white rounded-3xl p-6 md:p-8 mb-8 relative overflow-hidden shadow-xl border transition-colors duration-500 ${
-        storefrontMode === 'thrift' ? 'bg-[#08201a] border-emerald-900/30' : 'bg-[#150a1b] border-white/10'
+    <div className="animate-fade-in space-y-6">
+      {/* Unified Dynamic Hero Banner */}
+      <div className={`text-white rounded-3xl p-6 md:p-8 relative overflow-hidden shadow-sm border transition-colors duration-500 ${
+        storefrontMode === 'thrift' ? 'bg-[#08201a] border-emerald-900/40' : 'bg-[#150a1b] border-white/10'
       }`}>
-        {/* Background Image at 70% opacity */}
+        {/* Background Image */}
         <div 
-          className="absolute inset-0 bg-cover bg-center md:bg-right bg-no-repeat opacity-70 pointer-events-none transition-all duration-700"
+          className="absolute inset-0 bg-cover bg-center md:bg-right bg-no-repeat opacity-60 pointer-events-none transition-all duration-700"
           style={{ backgroundImage: `url(${storefrontMode === 'thrift' ? heroThriftImg : heroRetailImg})` }}
         />
-        {/* Left-to-right gradient so text is crisp and readable on the left */}
+        {/* Editorial Gradient */}
         <div className={`absolute inset-0 pointer-events-none transition-all duration-500 ${
           storefrontMode === 'thrift' 
-            ? 'bg-gradient-to-r from-[#194036] via-[#0d2e26]/30 to-transparent'
-            : 'bg-gradient-to-r from-[#150a1b] via-[#220e2c]/30 to-transparent'
+            ? 'bg-gradient-to-r from-[#0d2e26] via-[#0d2e26]/80 to-transparent'
+            : 'bg-gradient-to-r from-[#1A121F] via-[#1A121F]/80 to-transparent'
         }`} />
 
-        <div className="relative z-10 space-y-3 max-w-2xl animate-fade-in">
-          <span className={`px-3 py-1 backdrop-blur-md rounded-full text-[10px] font-extrabold uppercase tracking-wider inline-block border ${
+        <div className="relative z-10 space-y-3.5 max-w-2xl animate-fade-in">
+          <span className={`px-3 py-1 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-wider inline-block border ${
             storefrontMode === 'thrift'
               ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30'
-              : 'bg-white/15 text-[#ECD4A8] border-[#ECD4A8]/30'
+              : 'bg-white/10 text-[#ECD4A8] border-[#ECD4A8]/30'
           }`}>
-            {storefrontMode === 'thrift' ? 'Sustainable Wedding Marketplace' : 'ShaadiSahulat Storefronts'}
+            {storefrontMode === 'thrift' ? 'Sustainable Wedding Marketplace' : 'The Designer Boutique'}
           </span>
-          <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
-            {storefrontMode === 'thrift' ? '♻️ Thrift & Pre-Loved Hub' : '🛍️ Retail & Designer Storefront'}
+          <h2 className="text-3xl sm:text-4xl font-serif font-bold tracking-tight text-white leading-tight">
+            {storefrontMode === 'thrift' ? 'Pre-Loved Bridal & Heirloom Decor' : 'Bridal Couture & Wedding Essentials'}
           </h2>
-          <p className="text-gray-200 text-xs md:text-sm font-light leading-relaxed">
+          <p className="text-stone-300 text-xs md:text-sm font-sans font-normal leading-relaxed">
             {storefrontMode === 'thrift'
-              ? 'Discover verified pre-owned bridal dresses, jewelry & wedding decor at unbeatable prices.'
-              : 'Browse brand-new bridal collections, jewelry & boutique items directly from top sellers.'}
+              ? 'Explore authenticated pre-owned bridal lehengas, jewelry suites, and wedding decor from verified sellers across Pakistan.'
+              : 'Discover handcrafted bridal collections, jewelry, and high-end wedding essentials curated from top designers.'}
           </p>
           
           {/* Switcher Tabs */}
-          <div className="flex gap-4 pt-2">
+          <div className="flex gap-3 pt-2 max-w-md">
             <button
               onClick={() => setStorefrontMode('new')}
-              className={`flex-1 py-3 px-5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              className={`flex-1 py-2.5 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 storefrontMode === 'new'
-                  ? 'bg-gradient-to-r from-[#a37b3d] to-[#c69a54] text-white shadow-lg'
-                  : 'bg-white/10 hover:bg-white/20 text-gray-200 border border-white/10'
+                  ? 'bg-[#9B7036] text-white shadow-md'
+                  : 'bg-white/10 hover:bg-white/20 text-stone-200 border border-white/10'
               }`}
             >
-              🛍️ Retail / Brand New
+              <ShoppingBag size={14} /> Retail & Designer
             </button>
             <button
               onClick={() => setStorefrontMode('thrift')}
-              className={`flex-1 py-3 px-5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              className={`flex-1 py-2.5 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 storefrontMode === 'thrift'
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-lg'
-                  : 'bg-white/10 hover:bg-white/20 text-gray-200 border border-white/10'
+                  ? 'bg-emerald-700 text-white shadow-md'
+                  : 'bg-white/10 hover:bg-white/20 text-stone-200 border border-white/10'
               }`}
             >
-              ♻️ Pre-owned & Thrift
+              <Sparkles size={14} /> Pre-Loved & Thrift
             </button>
           </div>
         </div>
@@ -852,28 +852,26 @@ export default function MarketplacePage({
 
       {storefrontMode === 'new' ? (
         <>
-      {/* Search bar has been moved to the global Navbar (GlobalSearch component) */}
-
       {/* Clickable breadcrumb — Marketplace › category › subcategory */}
       <nav
         aria-label="Category breadcrumb"
-        className="mb-3 flex flex-wrap items-center gap-1.5 text-sm text-gray-500"
+        className="flex flex-wrap items-center gap-2 text-xs text-stone-500 font-medium"
       >
         <button
           type="button"
           onClick={goMarketplaceRoot}
-          className="inline-flex items-center gap-1 font-semibold text-[#a37b3d] hover:underline"
+          className="inline-flex items-center gap-1 font-bold text-[#9B7036] hover:underline cursor-pointer"
         >
-          <span aria-hidden>🛍️</span> Marketplace
+          Marketplace
         </button>
         {activeCatLabel && (
           <>
-            <span className="text-gray-300" aria-hidden>›</span>
+            <span className="text-stone-300">/</span>
             <button
               type="button"
               onClick={goCategoryOnly}
-              className={`capitalize hover:underline ${
-                activeSub ? 'text-[#a37b3d] font-semibold' : 'text-gray-800 font-bold'
+              className={`capitalize hover:underline cursor-pointer ${
+                activeSub ? 'text-[#9B7036] font-semibold' : 'text-stone-900 font-bold'
               }`}
             >
               {activeCatLabel}
@@ -882,14 +880,14 @@ export default function MarketplacePage({
         )}
         {activeSubLabel && (
           <>
-            <span className="text-gray-300" aria-hidden>›</span>
-            <span className="capitalize text-gray-800 font-bold">{activeSubLabel}</span>
+            <span className="text-stone-300">/</span>
+            <span className="capitalize text-stone-900 font-bold">{activeSubLabel}</span>
           </>
         )}
       </nav>
 
       {/* Category tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-3 scrollbar-hide">
+      <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-hide">
         {MAJOR_CATS.map(cat => {
           const isActive = activeCat === cat.id;
           return (
@@ -897,13 +895,13 @@ export default function MarketplacePage({
               key={cat.id || 'all'}
               type="button"
               onClick={() => handleCatChange(cat.id)}
-              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
+              className={`flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                 isActive
-                  ? 'bg-[#a37b3d] text-white shadow-md'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-[#ECD4A8]'
+                  ? 'bg-[#9B7036] text-white shadow-xs'
+                  : 'bg-white text-stone-700 border border-[#EFEAE4] hover:border-[#ECD4A8] hover:bg-[#FAF7F2]'
               }`}
             >
-              <span className="flex items-center justify-center w-5 h-5">{cat.icon}</span>
+              <span className="flex items-center justify-center w-4 h-4">{cat.icon}</span>
               <span>{cat.label}</span>
             </button>
           );
@@ -912,18 +910,18 @@ export default function MarketplacePage({
 
       {/* Subcategories — always visible on screen when a category is selected */}
       {activeCat && activeSubList.length > 0 && (
-        <div className="mb-5 rounded-2xl border border-[#F3E4D0] bg-[#FFF8F3] p-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 mb-2">
-            Subcategories in {activeCatLabel}
+        <div className="rounded-2xl border border-[#EADBCC] bg-[#FAF7F2]/60 p-4">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-2.5">
+            Curated Collections in {activeCatLabel}
           </p>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={goCategoryOnly}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                 !activeSub
-                  ? 'bg-[#a37b3d] text-white border-[#a37b3d] shadow-sm'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-[#ECD4A8]'
+                  ? 'bg-[#9B7036] text-white border-[#9B7036] shadow-xs'
+                  : 'bg-white text-stone-700 border-stone-200 hover:border-[#ECD4A8]'
               }`}
             >
               All {activeCatLabel}
@@ -938,10 +936,10 @@ export default function MarketplacePage({
                   key={subId}
                   type="button"
                   onClick={() => handleSubcategorySelect(activeCat, subId)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border capitalize transition-all ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold border capitalize transition-all cursor-pointer ${
                     isSubActive
-                      ? 'bg-[#a37b3d] text-white border-[#a37b3d] shadow-sm'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-[#ECD4A8]'
+                      ? 'bg-[#9B7036] text-white border-[#9B7036] shadow-xs'
+                      : 'bg-white text-stone-700 border-stone-200 hover:border-[#ECD4A8]'
                   }`}
                 >
                   {String(subLabel).replace(/_/g, ' ')}
@@ -952,90 +950,94 @@ export default function MarketplacePage({
         </div>
       )}
 
+
+      {/* Budget banner — hidden for admin and when buyer has no estimation */}
       {/* Budget banner — hidden for admin and when buyer has no estimation */}
       {!isAdminView && activeCat && hasDowry && (
         budgetInfo ? (
-          <div className="mb-4 p-3 bg-[#FFF5F8] border border-[#FBEFF1] rounded-xl flex items-center gap-4 text-sm flex-wrap">
-            <span className="font-semibold text-[#a37b3d] capitalize">
-              {MAJOR_CATS.find(c => c.id === activeCat)?.label || activeCat} Budget
+          <div className="p-3.5 bg-[#FAF7F2] border border-[#EADBCC] rounded-2xl flex items-center gap-4 text-xs flex-wrap">
+            <span className="font-bold text-[#9B7036] uppercase tracking-wider capitalize">
+              {MAJOR_CATS.find(c => c.id === activeCat)?.label || activeCat} Budget:
             </span>
-            <span className="text-gray-600">
-              Estimated: <strong>PKR {(budgetInfo.estimated || 0).toLocaleString()}</strong>
+            <span className="text-stone-600">
+              Estimated: <strong className="font-serif text-stone-900">PKR {(budgetInfo.estimated || 0).toLocaleString()}</strong>
             </span>
-            <span className="text-gray-600">
-              Spent: <strong>PKR {(budgetInfo.spent || 0).toLocaleString()}</strong>
+            <span className="text-stone-600">
+              Spent: <strong className="font-serif text-stone-900">PKR {(budgetInfo.spent || 0).toLocaleString()}</strong>
             </span>
-            <span className={budgetInfo.remaining < 0 ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
+            <span className={budgetInfo.remaining < 0 ? 'text-rose-700 font-bold font-serif' : 'text-emerald-800 font-bold font-serif'}>
               Remaining: PKR {(budgetInfo.remaining ?? budgetInfo.estimated ?? 0).toLocaleString()}
             </span>
           </div>
         ) : (
-          <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center gap-3 text-sm">
-            <span className="text-gray-400">📋</span>
-            <span className="text-gray-500 capitalize">
+          <div className="p-3 bg-[#FAF7F2]/50 border border-stone-200/60 rounded-2xl flex items-center gap-2 text-xs text-stone-500">
+            <span className="font-bold capitalize text-stone-700">
               {MAJOR_CATS.find(c => c.id === activeCat)?.label || activeCat}:
             </span>
-            <span className="font-medium text-gray-400 italic">Not budgeted</span>
+            <span className="italic">Category not explicitly budgeted in active plan</span>
           </div>
         )
       )}
 
       {/* Controls row */}
-      <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500">
-            {loading ? 'Loading…' : `${total} product${total !== 1 ? 's' : ''}`}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2.5">
+          <span className="text-xs font-semibold text-stone-500">
+            {loading ? 'Curating catalog…' : `${total} collection item${total !== 1 ? 's' : ''}`}
           </span>
           <button onClick={() => setShowFilter(v => !v)}
-            className={`text-xs px-3 py-1.5 border rounded-lg font-medium transition-colors ${
-              showFilter ? 'bg-[#FFF5F8] border-[#ECD4A8] text-[#a37b3d]' : 'bg-white border-gray-200 text-gray-600 hover:border-[#ECD4A8]'
+            className={`text-xs px-3.5 py-1.5 border rounded-xl font-bold transition-all cursor-pointer ${
+              showFilter ? 'bg-[#9B7036] text-white border-[#9B7036]' : 'bg-white border-stone-200 text-stone-700 hover:border-[#ECD4A8]'
             }`}>
-            Filters
+            Refine Filters
           </button>
           {(condition || minPrice || maxPrice || cityFilter) && (
-            <button onClick={clearFilters} className="text-xs text-red-400 hover:text-red-600">Clear</button>
+            <button onClick={clearFilters} className="text-xs text-rose-600 hover:underline cursor-pointer font-semibold">Reset filters</button>
           )}
         </div>
-        <select value={sortBy} onChange={e => { setSortBy(e.target.value); setPage(1); }}
-          className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#ECD4A8] bg-white">
-          {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-stone-400 font-medium">Sort by:</span>
+          <select value={sortBy} onChange={e => { setSortBy(e.target.value); setPage(1); }}
+            className="text-xs font-semibold border border-stone-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#ECD4A8] bg-white cursor-pointer">
+            {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </div>
       </div>
 
       {/* Filter panel */}
       {showFilter && (
-        <div className="bg-white rounded-xl border border-[#FBEFF1] p-4 mb-5 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-2xl border border-[#EFEAE4] p-5 grid grid-cols-2 md:grid-cols-4 gap-4 shadow-xs">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Min Price (PKR)</label>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">Min Price (PKR)</label>
             <input type="number" value={minPrice} onChange={e => setMinPrice(e.target.value)}
               placeholder="0" min="0"
-              className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ECD4A8]" />
+              className="w-full border border-stone-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#ECD4A8] bg-[#FAF7F2]/40" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Max Price (PKR)</label>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">Max Price (PKR)</label>
             <input type="number" value={maxPrice} onChange={e => setMaxPrice(e.target.value)}
-              placeholder="Any" min="0"
-              className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ECD4A8]" />
+              placeholder="Any budget" min="0"
+              className="w-full border border-stone-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#ECD4A8] bg-[#FAF7F2]/40" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Condition</label>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">Condition</label>
             <select value={condition} onChange={e => setCondition(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ECD4A8]">
-              <option value="">All</option>
+              className="w-full border border-stone-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#ECD4A8] bg-[#FAF7F2]/40 cursor-pointer">
+              <option value="">All Conditions</option>
               {CONDITIONS.filter(Boolean).map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">City</label>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">City / Location</label>
             <input type="text" value={cityFilter} onChange={e => setCityFilter(e.target.value)}
-              placeholder="e.g. Lahore"
-              className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ECD4A8]" />
+              placeholder="e.g. Lahore, Karachi"
+              className="w-full border border-stone-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#ECD4A8] bg-[#FAF7F2]/40" />
           </div>
-          <div className="col-span-2 md:col-span-4 flex gap-2 justify-end">
+          <div className="col-span-2 md:col-span-4 flex gap-2 justify-end pt-2 border-t border-stone-100">
             <button onClick={clearFilters}
-              className="px-4 py-1.5 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg">Reset</button>
+              className="px-4 py-2 text-xs font-semibold text-stone-500 hover:text-stone-800 border border-stone-200 rounded-xl cursor-pointer">Clear All</button>
             <button onClick={applyFilters}
-              className="px-4 py-1.5 text-sm text-white bg-[#a37b3d] hover:bg-[#8a6633] rounded-lg font-medium">Apply</button>
+              className="px-5 py-2 text-xs font-bold text-white bg-[#9B7036] hover:bg-[#7E5724] rounded-xl shadow-xs cursor-pointer">Apply Filters</button>
           </div>
         </div>
       )}

@@ -61,6 +61,8 @@ import {
   ShoppingCart, PlusCircle, Package, LineChart, Star
 } from 'lucide-react';
 import logo from './assets/ShaadiSahulat Logo PNG.png';
+import BuyerPageHero from './components/Common/BuyerPageHero';
+import accountHeroImg from './assets/hero/Buyer_Account.jpg';
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 // Session state lives in src/context/AuthContext.jsx (JWT + HttpOnly refresh cookie).
@@ -129,61 +131,89 @@ function BuyerAccountView({ buyer }) {
     : 'Recently';
 
   return (
-    <div className="animate-fade-in max-w-2xl mx-auto space-y-6">
+    <div className="animate-fade-in max-w-3xl mx-auto space-y-6">
+      <BuyerPageHero
+        badge={<><User size={13} /> My Account</>}
+        title="Buyer Profile & Preferences"
+        subtitle="Manage your bridal portal identity, contact details, and VIP milestone progress."
+        image={accountHeroImg}
+        imageAlt="Elegant bridal vanity account mood"
+      />
+
       {/* Profile Card */}
-      <div className="bg-white rounded-3xl shadow-sm border border-[#FBEFF1] p-6 sm:p-8">
-        <div className="flex items-center gap-5 mb-6">
-          <div className="w-20 h-20 bg-gradient-to-br from-[#a37b3d] to-[#ECD4A8] rounded-2xl flex items-center justify-center text-white text-3xl font-extrabold shrink-0 shadow-md">
-            {buyer?.name?.[0]?.toUpperCase() || '?'}
+      <div className="bg-white rounded-3xl shadow-xs border border-[#EADBCC] p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 pb-6 border-b border-[#EFEAE4]">
+          <div className="w-20 h-20 bg-gradient-to-br from-[#1C1814] to-[#362A1F] border-2 border-[#9B7036] rounded-2xl flex items-center justify-center text-[#ECD4A8] text-3xl font-serif font-bold shrink-0 shadow-luxury overflow-hidden relative">
+            <img src={accountHeroImg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-35" />
+            <span className="relative z-10">{buyer?.name?.[0]?.toUpperCase() || 'B'}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-2xl font-extrabold text-gray-900 truncate">{buyer?.name}</h2>
-            <p className="text-sm text-gray-400 truncate">{buyer?.email}</p>
-            <span className="inline-block mt-2 px-3 py-1 bg-[#FFF5F8] text-[#a37b3d] font-bold text-xs rounded-full border border-[#ECD4A8]">
-              {levelInfo.label}
-            </span>
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <h2 className="text-2xl font-serif font-bold text-gray-900 truncate">{buyer?.name}</h2>
+              <span className="text-[10px] uppercase font-bold tracking-widest px-3 py-0.5 rounded-full bg-[#FAF3E8] text-[#9B7036] border border-[#ECD4A8]/60">
+                {levelInfo.label}
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 font-light truncate">{buyer?.email}</p>
+            {buyer?.cnic && (
+              <p className="text-[11px] font-mono text-gray-400 mt-1">Verified CNIC: {buyer.cnic}</p>
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
-          {buyer?.phone && (
-            <div className="bg-gray-50 rounded-2xl p-3.5 border border-gray-100">
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-0.5">Phone</p>
-              <p className="font-semibold text-gray-800">{buyer.phone}</p>
-            </div>
-          )}
-          {buyer?.city && (
-            <div className="bg-gray-50 rounded-2xl p-3.5 border border-gray-100">
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-0.5">City</p>
-              <p className="font-semibold text-gray-800">📍 {buyer.city}</p>
-            </div>
-          )}
-          <div className="bg-gray-50 rounded-2xl p-3.5 border border-gray-100">
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-0.5">Member Since</p>
-            <p className="font-semibold text-gray-800">{joined}</p>
+        {/* Metadata Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div className="bg-[#FAF7F2] rounded-xl p-3.5 border border-[#EFEAE4]">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Contact Phone</p>
+            <p className="font-semibold text-gray-900">{buyer?.phone || 'Not provided'}</p>
           </div>
-          <div className="bg-gray-50 rounded-2xl p-3.5 border border-gray-100">
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-0.5">Total Orders</p>
-            <p className="font-extrabold text-[#a37b3d] text-base">{realOrderCount}</p>
+          <div className="bg-[#FAF7F2] rounded-xl p-3.5 border border-[#EFEAE4]">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">City / Region</p>
+            <p className="font-semibold text-gray-900">{buyer?.city || 'Pakistan'}</p>
+          </div>
+          <div className="bg-[#FAF7F2] rounded-xl p-3.5 border border-[#EFEAE4]">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Member Since</p>
+            <p className="font-semibold text-gray-900">{joined}</p>
+          </div>
+          <div className="bg-[#FAF7F2] rounded-xl p-3.5 border border-[#EFEAE4]">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Commissions</p>
+            <p className="font-serif font-bold text-[#9B7036] text-base">{realOrderCount}</p>
           </div>
         </div>
       </div>
 
-      {/* Buyer Level Card */}
-      <div className="bg-white rounded-3xl shadow-sm border border-[#FBEFF1] p-6 sm:p-8">
-        <h3 className="text-base font-extrabold text-gray-900 mb-3">Buyer Level & Tier Status</h3>
-        <LevelBadge level={levelInfo.level} label={levelInfo.label} colorClass={levelInfo.color} />
-        <LevelProgress info={levelInfo} ordersLabel={`${realOrderCount} order${realOrderCount !== 1 ? 's' : ''}`} />
-        <div className="mt-5 grid grid-cols-3 gap-3 text-xs text-center">
+      {/* VIP Tier & Loyalty Card */}
+      <div className="bg-white rounded-3xl shadow-xs border border-[#EADBCC] p-6 sm:p-8 space-y-4">
+        <div>
+          <span className="text-[10px] uppercase font-bold tracking-widest text-[#9B7036] bg-[#FAF3E8] px-2.5 py-0.5 rounded-full border border-[#ECD4A8]/40">
+            Privilege Program
+          </span>
+          <h3 className="text-lg font-serif font-bold text-gray-900 mt-1.5 mb-0.5">VIP Bridal Tier & Milestone Status</h3>
+          <p className="text-xs text-gray-500 font-light">Unlock priority artisan dispatch and exclusive preview invites with each completed order.</p>
+        </div>
+
+        <div className="pt-2">
+          <LevelBadge level={levelInfo.level} label={levelInfo.label} colorClass={levelInfo.color} />
+          <LevelProgress info={levelInfo} ordersLabel={`${realOrderCount} order${realOrderCount !== 1 ? 's' : ''}`} />
+        </div>
+
+        <div className="grid grid-cols-3 gap-3 text-xs text-center pt-2">
           {[
-            { l: 1, label: 'New Buyer', at: 'On registration' },
-            { l: 2, label: 'Active Buyer', at: '3+ orders' },
-            { l: 3, label: 'Loyal Buyer', at: '7+ orders' },
+            { l: 1, label: 'Standard Tier', at: 'Registered Member' },
+            { l: 2, label: 'Silver Concierge', at: '3+ Orders' },
+            { l: 3, label: 'Gold Haute Couture', at: '7+ Orders' },
           ].map(({ l, label, at }) => (
-            <div key={l} className={`rounded-2xl p-3 border transition-all ${levelInfo.level >= l ? 'bg-[#FFF5F8] border-[#ECD4A8] text-[#a37b3d] font-bold shadow-sm' : 'bg-gray-50 border-gray-100 text-gray-400'}`}>
-              <p className="text-sm font-extrabold">L{l}</p>
-              <p className="font-medium text-xs mt-0.5">{label}</p>
-              <p className="text-[10px] text-gray-400 mt-1">{at}</p>
+            <div
+              key={l}
+              className={`rounded-xl p-3.5 border transition-all ${
+                levelInfo.level >= l
+                  ? 'bg-[#FAF3E8] border-[#ECD4A8] text-[#4A3B2C] shadow-xs'
+                  : 'bg-[#FAF7F2] border-[#EFEAE4] text-gray-400'
+              }`}
+            >
+              <p className="text-xs font-serif font-bold text-[#9B7036]">Level 0{l}</p>
+              <p className="font-bold text-xs mt-0.5 text-gray-900">{label}</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">{at}</p>
             </div>
           ))}
         </div>

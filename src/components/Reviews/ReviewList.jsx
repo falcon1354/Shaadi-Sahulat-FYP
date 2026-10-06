@@ -85,18 +85,7 @@ export default function ReviewList({
             <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{r.comment}</p>
           )}
 
-          {r.voice_url && (
-            <div className="mt-3 rounded-xl bg-gray-50 border border-gray-100 px-3 py-2">
-              <p className="text-[10px] font-semibold text-gray-500 mb-1">
-                Listen to this review
-                {r.voice_language ? ` · ${r.voice_language === 'ur' ? 'Urdu/Hindi' : 'English'}` : ''}
-                {r.voice_gender ? ` · ${r.voice_gender}` : ''}
-              </p>
-              <audio controls preload="none" className="w-full h-9" src={r.voice_url}>
-                Your browser does not support audio.
-              </audio>
-            </div>
-          )}
+          {/* Review voiceover playback hidden for current evaluation */}
 
           {/* Footer: product info (seller view), would-recommend */}
           {(showProduct && r.product_id) && (
