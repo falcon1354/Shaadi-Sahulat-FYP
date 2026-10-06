@@ -223,12 +223,17 @@ TRIPLET_CONFIG = {
 }
 
 # ── Hybrid Search Weights ──────────────────────────────────────────────────
-# When a category IS provided: visual features still dominate but text helps
-# When NO category given:      rely almost entirely on visual similarity
+# Vision-first: image embeddings dominate; text/color are light tie-breakers only.
 HYBRID_WEIGHTS = {
-    "with_category": {"image": 0.40, "text": 0.60},
-    "no_category":   {"image": 0.40, "text": 0.60},
+    "with_category": {"image": 0.82, "text": 0.18},
+    "no_category":   {"image": 0.88, "text": 0.12},
 }
+
+# Absolute floor — candidates below this image cosine are dropped unless the
+# catalog is too sparse to fill top_k (then we fall back to the best available).
+MIN_IMAGE_SIM_FOR_RESULTS = 0.22
+# Re-rank pool: keep the top-N by pure image similarity, then blend color/text.
+IMAGE_CANDIDATE_POOL = 40
 
 # ── Recommendation Count ───────────────────────────────────────────────────
 MAX_RESULTS_DEFAULT = 3     # Return up to 3 recommendations via cascade

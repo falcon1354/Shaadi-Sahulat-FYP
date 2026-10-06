@@ -21,12 +21,11 @@ Build flow (call build_index once after seeding catalog):
   3. Write all products to MongoDB (dress_catalog collection).
 
 Query flow (hybrid_search — called per recommendation request):
-  1. Products loaded from MongoDB (dress_catalog + seller_products) into RAM
-  2. Compute image cosine similarity   query_emb  vs  each product_emb
-  3. Compute text  cosine similarity   query_tfidf vs  each product_tfidf
-  4. Hybrid score = α * img_sim + (1-α) * text_sim
-     α = 0.70 when category provided, 0.85 when not
-  5. Return top-2 sorted by hybrid score (descending)
+  1. Products loaded from MongoDB (seller_products) into RAM
+  2. Score every product by image cosine similarity (primary)
+  3. Shortlist top IMAGE_CANDIDATE_POOL by image_sim; drop weak visuals
+  4. Lightly blend color + TF-IDF as tie-breakers only (~6–12%)
+  5. Return top-K sorted by vision-first hybrid score
 """
 
 from __future__ import annotations
@@ -40,6 +39,7 @@ from PIL import Image
 from config import (
     IMAGE_SIZE, CATEGORY_IDS, CATEGORY_LABELS,
     HYBRID_WEIGHTS, MAX_RESULTS_DEFAULT, DRESS_TO_ML_CLASS,
+    MIN_IMAGE_SIM_FOR_RESULTS, IMAGE_CANDIDATE_POOL,
 )
 from description_generator import generate_description
 from tfidf_engine import (
@@ -321,20 +321,21 @@ def _family_color_sim(q: dict, p: dict) -> float:
     return 1.0 if qf == pf else 0.0
 
 
-# ── 5-Level Cascade ────────────────────────────────────────────────────────
+# ── 5-Level Cascade (labels + light scoring) ───────────────────────────────
+#
+# Ranking is VISION-FIRST: candidates are first shortlisted by image cosine,
+# then lightly re-scored. Text/TF-IDF never outranks a stronger visual match.
 #
 # Each entry: (level, label, min_img, min_ce, min_cf, min_tf, weights)
 # weights = (w_img, w_color_exact, w_color_family, w_tfidf) — must sum to 1
-# A product is assigned the FIRST level whose thresholds are all met.
-# None = no threshold for that dimension.
 #
 _CASCADE_LEVELS = [
-    # Lv  Label              img    ce     cf     tf     weights
-    (1, "Visual Match",      0.55,  None,  None,  None,  (1.00, 0.00, 0.00, 0.00)),
-    (2, "Color Match",       0.28,  0.70,  None,  None,  (0.45, 0.55, 0.00, 0.00)),
-    (3, "Color Family",      None,  None,  0.65,  None,  (0.30, 0.00, 0.70, 0.00)),
-    (4, "Category Match",    None,  None,  None,  0.15,  (0.25, 0.00, 0.00, 0.75)),
-    (5, "Closest Match",     None,  None,  None,  None,  (0.40, 0.00, 0.00, 0.60)),
+    # Lv  Label              img    ce     cf     tf     weights (img-heavy)
+    (1, "Visual Match",      0.50,  None,  None,  None,  (1.00, 0.00, 0.00, 0.00)),
+    (2, "Color Match",       0.32,  0.55,  None,  None,  (0.70, 0.25, 0.00, 0.05)),
+    (3, "Color Family",      0.28,  None,  0.65,  None,  (0.72, 0.00, 0.20, 0.08)),
+    (4, "Category Match",    0.24,  None,  None,  0.10,  (0.78, 0.00, 0.00, 0.22)),
+    (5, "Closest Match",     None,  None,  None,  None,  (0.88, 0.04, 0.00, 0.08)),
 ]
 
 
@@ -344,7 +345,7 @@ def _cascade_level(
     color_family: float,
     tfidf_sim: float,
 ) -> tuple[int, str, float]:
-    """Return (level, label, score) — lowest level = best quality match."""
+    """Return (level, label, score) — score is always image-dominated."""
     for lv, label, img_t, ce_t, cf_t, tf_t, w in _CASCADE_LEVELS:
         if img_t is not None and img_sim     < img_t: continue
         if ce_t  is not None and color_exact < ce_t:  continue
@@ -352,8 +353,26 @@ def _cascade_level(
         if tf_t  is not None and tfidf_sim   < tf_t:  continue
         score = w[0]*img_sim + w[1]*color_exact + w[2]*color_family + w[3]*tfidf_sim
         return lv, label, score
-    score = 0.40 * img_sim + 0.60 * tfidf_sim
+    # Fallback: almost pure visual
+    score = 0.90 * img_sim + 0.05 * max(color_exact, color_family * 0.5) + 0.05 * tfidf_sim
     return 5, "Closest Match", score
+
+
+def _vision_score(
+    img_sim: float,
+    color_exact: float,
+    color_family: float,
+    tfidf_sim: float,
+    has_category: bool,
+) -> float:
+    """Primary ranking score — image cosine dominates text/color."""
+    # Explicit vision-first blend regardless of older text-heavy configs
+    color_boost = max(color_exact, 0.55 * color_family)
+    return (
+        0.82 * img_sim
+        + 0.12 * color_boost
+        + 0.06 * tfidf_sim
+    )
 
 
 # ── Cascade search ─────────────────────────────────────────────────────────
@@ -374,29 +393,17 @@ def hybrid_search(
     top_k:            int = MAX_RESULTS_DEFAULT,
 ) -> list[dict]:
     """
-    Multi-level cascade similarity search (seller_products only).
+    Vision-first similarity search (seller_products only).
 
-    Levels — a product is assigned the FIRST (best) level it qualifies for:
-      1  Visual Match    — image_sim ≥ 0.55
-      2  Color Match     — image_sim ≥ 0.28  AND  exact_color ≥ 0.70
-      3  Color Family    — same broad color family (red/blue/gold/…)
-      4  Category Match  — TF-IDF ≥ 0.15
-      5  Closest Match   — fallback (always qualifies)
-
-    Category is a SOFT preference only (never a hard filter). Marketplace dresses
-    use fine-grained types (bridal_maxi, groom_sherwani, …) while the classifier
-    only outputs 3 ML classes — hard equality excluded the true product when the
-    user re-uploaded that listing's own image.
-
-    Results sorted: level ASC (1=best), then score DESC within same level.
-    Returns top_k results.
+    1. Score every dress by image cosine similarity
+    2. Keep the top IMAGE_CANDIDATE_POOL by image_sim (and drop very weak visuals)
+    3. Lightly blend color + TF-IDF as tie-breakers only
+    4. Sort by vision_score / image_sim — never let text outrank a better visual match
     """
     products = _load_cache()
     if not products:
         return []
 
-    # Soft category preference — always score the full dress index so near-duplicate
-    # marketplace images can surface even when predicted class ≠ product.item_type.
     search_ml = _ml_class_for(category) if category else ""
     candidates = products
 
@@ -418,18 +425,26 @@ def hybrid_search(
         color_exact  = _exact_color_sim(query_color_info,  prod_color) if query_color_info else 0.0
         color_family = _family_color_sim(query_color_info, prod_color) if query_color_info else 0.0
 
-        level, match_label, score = _cascade_level(img_sim, color_exact, color_family, tfidf_sim)
+        level, match_label, cascade_score = _cascade_level(
+            img_sim, color_exact, color_family, tfidf_sim
+        )
 
-        # Near-duplicate of a marketplace photo → always treat as Visual Match
-        if img_sim >= 0.82:
+        # Near-duplicate marketplace photo → force Visual Match
+        if img_sim >= 0.78:
             level, match_label = 1, "Visual Match"
-            score = max(score, img_sim)
 
-        # Soft category boost (does not exclude other types)
-        if search_ml:
+        vision = _vision_score(
+            img_sim, color_exact, color_family, tfidf_sim, bool(category)
+        )
+
+        # Tiny soft category nudge — only when visual is already decent
+        if search_ml and img_sim >= 0.28:
             prod_ml = _ml_class_for(prod.get("category"))
             if prod.get("category") == category or prod_ml == search_ml:
-                score = min(1.0, score + 0.04)
+                vision = min(1.0, vision + 0.02)
+
+        # Final score: image dominates; cascade label is informational
+        score = 0.92 * vision + 0.08 * cascade_score
 
         img_url = prod.get("image_url") or prod.get("image_path", "")
         scored.append({
@@ -456,9 +471,27 @@ def hybrid_search(
             "match_label":        match_label,
         })
 
-    # Level 1 = best — sort by level ASC, score DESC within same level
-    scored.sort(key=lambda x: (x["match_level"], -x["hybrid_score"]))
-    return scored[:top_k]
+    if not scored:
+        return []
+
+    # 1) Shortlist by pure visual similarity
+    scored.sort(key=lambda x: x["image_similarity"], reverse=True)
+    pool = scored[: max(IMAGE_CANDIDATE_POOL, top_k * 8)]
+
+    # 2) Drop weak visuals when stronger ones exist
+    strong = [r for r in pool if r["image_similarity"] >= MIN_IMAGE_SIM_FOR_RESULTS]
+    if len(strong) >= top_k:
+        pool = strong
+    elif strong:
+        # Keep strong first, then fill from next-best visuals only
+        weak = [r for r in pool if r["image_similarity"] < MIN_IMAGE_SIM_FOR_RESULTS]
+        pool = strong + weak[: max(0, top_k - len(strong))]
+
+    # 3) Final rank: vision score, then raw image_sim (text cannot overtake)
+    pool.sort(
+        key=lambda x: (-x["hybrid_score"], -x["image_similarity"], x["match_level"])
+    )
+    return pool[:top_k]
 
 
 # ── Stats helper ───────────────────────────────────────────────────────────

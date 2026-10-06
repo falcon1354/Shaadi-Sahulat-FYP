@@ -178,12 +178,12 @@ class VisualPredictor:
         desc_data        = self._build_query_description(image, predicted_category)
         query_color_info = desc_data.get("color_info")
 
-        # Merge user description (NLP-preprocessed) with auto-generated description.
-        # Concatenating user text first gives it slightly higher TF-IDF term frequency.
+        # Merge user description lightly — visual auto-desc stays primary for TF-IDF.
+        # Putting auto_desc first keeps keyword spam in the text box from dominating.
         auto_desc = desc_data["description"]
         if user_description and user_description.strip():
             clean_user = preprocess_text(user_description)
-            combined_desc = f"{clean_user} {auto_desc}"
+            combined_desc = f"{auto_desc} {clean_user}"
         else:
             combined_desc = auto_desc
 
@@ -211,30 +211,31 @@ class VisualPredictor:
         )
 
         # ── Post-search similarity gate ────────────────────────────────────
-        # If the BEST result scores below _GATE_THRESHOLD in every dimension,
-        # the uploaded image is likely not a bridal dress from our catalog.
+        # Reject when NONE of the returned results looks visually related.
         if results:
             best = results[0]
+            best_img = best.get("image_similarity", 0)
             best_any_dim = max(
-                best.get("image_similarity",  0),
-                best.get("color_exact_sim",   0),
-                best.get("color_family_sim",  0),
-                best.get("text_similarity",   0),
+                best_img,
+                best.get("color_exact_sim",   0) * 0.5,  # color alone is not enough
+                best.get("color_family_sim",  0) * 0.35,
+                best.get("text_similarity",   0) * 0.25,  # text alone must not pass the gate
             )
-            if best_any_dim < _GATE_THRESHOLD:
+            # Prefer a visual floor: weak image match → reject even if text matched
+            if best_img < 0.18 or best_any_dim < _GATE_THRESHOLD:
                 return {
                     "status": "rejected",
                     "stage":  "similarity_gate",
                     "reason": (
-                        f"No bridal dress match found. "
-                        f"Best similarity across all dimensions was "
-                        f"{best_any_dim * 100:.0f}% (threshold {_GATE_THRESHOLD * 100:.0f}%). "
-                        f"Upload a clear bridal dress photo and describe it in the text box."
+                        f"No visually similar bridal dress found. "
+                        f"Best image similarity was {best_img * 100:.0f}% "
+                        f"(need about {max(_GATE_THRESHOLD, 0.18) * 100:.0f}%+). "
+                        f"Upload a clearer full-length dress photo."
                     ),
-                    "best_score": round(best_any_dim, 4),
-                    "threshold":  _GATE_THRESHOLD,
+                    "best_score": round(best_img, 4),
+                    "threshold":  max(_GATE_THRESHOLD, 0.18),
                     "suggestion": "Try: a full-length dress photo on a plain background, "
-                                  "and describe the color and style (e.g. 'deep red bridal lehenga with heavy embroidery').",
+                                  "and optionally name the style (lehenga / sharara / saree).",
                     "validation": {
                         "stage1_passed": True,
                         "stage2_passed": True,
